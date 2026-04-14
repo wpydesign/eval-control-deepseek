@@ -7,8 +7,10 @@
  *
  * Usage: node llm_bridge.mjs <input_json_path>
  *
- * Input JSON: { "prompt": "...", "role": "primary|baseline" }
+ * Input JSON: { "prompt": "...", "role": "primary|baseline", "temperature": 0.7 }
  * Output JSON: { "content": "...", "token_count": N, "finish_reason": "..." }
+ *
+ * v1.3: Added temperature parameter for stochastic sampling.
  */
 
 import ZAI from 'z-ai-web-dev-sdk';
@@ -23,7 +25,7 @@ if (!inputPath) {
 async function main() {
   try {
     const input = JSON.parse(readFileSync(inputPath, 'utf-8'));
-    const { prompt, role } = input;
+    const { prompt, role, temperature } = input;
 
     const zai = await ZAI.create();
 
@@ -38,6 +40,7 @@ async function main() {
           content: prompt
         }
       ],
+      temperature: typeof temperature === 'number' ? temperature : undefined,
     });
 
     const choice = completion.choices?.[0];
