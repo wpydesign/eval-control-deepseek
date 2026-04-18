@@ -122,26 +122,42 @@ SYNONYMS = {
 }
 
 
+def _strip_punct(token: str) -> str:
+    """Remove all punctuation from a token. Keeps apostrophes for contraction lookup."""
+    return "".join(ch for ch in token if ch.isalnum() or ch == "'")
+
+
+def _depossess(token: str) -> str:
+    """Strip possessive 's from token: japan's -> japan."""
+    if token.endswith("'s"):
+        return token[:-2]
+    return token
+
+
 def normalize_text(text: str) -> str:
     """
     Pre-processing pipeline before TF-IDF:
       1. Lowercase
-      2. Expand contractions via synonym map
-      3. Remove stopwords
+      2. Strip punctuation (order matters: punct first, then lookup)
+      3. Expand contractions via synonym map
+      4. Remove stopwords
     """
     text = text.lower().strip()
-    # Expand contractions / synonyms
     tokens = text.split()
     expanded = []
     for tok in tokens:
-        # Strip punctuation from token edges for lookup
-        clean = tok.strip(".,;:!?()[]{}\"'-/")
+        # Strip ALL punctuation first (handles commas, periods, etc.)
+        clean = _strip_punct(tok)
+        if not clean:
+            continue
+        # Handle possessives: "japan's" -> "japan"
+        clean = _depossess(clean)
+        # Try contraction/synonym expansion
         replacement = SYNONYMS.get(clean, clean)
         if replacement != clean:
             expanded.extend(replacement.split())
         elif clean not in STOPWORDS:
             expanded.append(clean)
-        # else: stopword — dropped
     return " ".join(expanded)
 
 

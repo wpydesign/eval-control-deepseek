@@ -1,0 +1,1202 @@
+[
+  {
+    "prompt": "What is the boiling point of water at sea level?",
+    "class": "good"
+  },
+  {
+    "prompt": "The boiling point of water at sea level is what?",
+    "class": "good"
+  },
+  {
+    "prompt": "At sea level, what temperature does water boil at?",
+    "class": "good"
+  },
+  {
+    "prompt": "Tell me the boiling point of water when at sea level.",
+    "class": "good"
+  },
+  {
+    "prompt": "Water boils at what temperature at sea level?",
+    "class": "good"
+  },
+  {
+    "prompt": "What temperature does water reach when boiling at sea level?",
+    "class": "good"
+  },
+  {
+    "prompt": "Explain what temperature water boils at sea level.",
+    "class": "good"
+  },
+  {
+    "prompt": "How hot does water need to be to boil at sea level?",
+    "class": "good"
+  },
+  {
+    "prompt": "What is the boiling temperature of water at sea level?",
+    "class": "good"
+  },
+  {
+    "prompt": "The boiling temperature of water at sea level is?",
+    "class": "good"
+  },
+  {
+    "prompt": "Summarize the water cycle in three sentences.",
+    "class": "good"
+  },
+  {
+    "prompt": "Describe the water cycle using exactly three sentences.",
+    "class": "good"
+  },
+  {
+    "prompt": "In three sentences, explain how the water cycle works.",
+    "class": "good"
+  },
+  {
+    "prompt": "Give a three-sentence summary of the water cycle.",
+    "class": "good"
+  },
+  {
+    "prompt": "Briefly describe the water cycle in three sentences.",
+    "class": "good"
+  },
+  {
+    "prompt": "What is the water cycle? Summarize it in three sentences.",
+    "class": "good"
+  },
+  {
+    "prompt": "Explain the water cycle. Use no more than three sentences.",
+    "class": "good"
+  },
+  {
+    "prompt": "Three-sentence summary of the water cycle.",
+    "class": "good"
+  },
+  {
+    "prompt": "Can you summarize the water cycle in three sentences?",
+    "class": "good"
+  },
+  {
+    "prompt": "Describe the process of the water cycle in three sentences.",
+    "class": "good"
+  },
+  {
+    "prompt": "List three causes of the French Revolution.",
+    "class": "good"
+  },
+  {
+    "prompt": "What were three causes of the French Revolution?",
+    "class": "good"
+  },
+  {
+    "prompt": "Name three factors that caused the French Revolution.",
+    "class": "good"
+  },
+  {
+    "prompt": "Give three reasons why the French Revolution started.",
+    "class": "good"
+  },
+  {
+    "prompt": "What caused the French Revolution? List three main causes.",
+    "class": "good"
+  },
+  {
+    "prompt": "Identify three causes of the French Revolution.",
+    "class": "good"
+  },
+  {
+    "prompt": "Three main causes of the French Revolution were what?",
+    "class": "good"
+  },
+  {
+    "prompt": "List 3 causes of the French Revolution.",
+    "class": "good"
+  },
+  {
+    "prompt": "What are three reasons the French Revolution occurred?",
+    "class": "good"
+  },
+  {
+    "prompt": "Provide three causes of the French Revolution.",
+    "class": "good"
+  },
+  {
+    "prompt": "What does the mitochondria do in a cell?",
+    "class": "good"
+  },
+  {
+    "prompt": "What is the function of mitochondria in cells?",
+    "class": "good"
+  },
+  {
+    "prompt": "Explain the role of mitochondria in a cell.",
+    "class": "good"
+  },
+  {
+    "prompt": "What does a mitochondrion do?",
+    "class": "good"
+  },
+  {
+    "prompt": "Describe what mitochondria do inside cells.",
+    "class": "good"
+  },
+  {
+    "prompt": "The function of mitochondria in a cell is what?",
+    "class": "good"
+  },
+  {
+    "prompt": "How do mitochondria function within cells?",
+    "class": "good"
+  },
+  {
+    "prompt": "What is the purpose of mitochondria in cellular biology?",
+    "class": "good"
+  },
+  {
+    "prompt": "Mitochondria serve what purpose in cells?",
+    "class": "good"
+  },
+  {
+    "prompt": "Explain what mitochondria do.",
+    "class": "good"
+  },
+  {
+    "prompt": "How does HTTPS differ from HTTP?",
+    "class": "good"
+  },
+  {
+    "prompt": "What is the difference between HTTPS and HTTP?",
+    "class": "good"
+  },
+  {
+    "prompt": "Explain the differences between HTTP and HTTPS.",
+    "class": "good"
+  },
+  {
+    "prompt": "Compare HTTP and HTTPS.",
+    "class": "good"
+  },
+  {
+    "prompt": "What makes HTTPS different from HTTP?",
+    "class": "good"
+  },
+  {
+    "prompt": "HTTPS vs HTTP: what is the difference?",
+    "class": "good"
+  },
+  {
+    "prompt": "How is HTTPS different from regular HTTP?",
+    "class": "good"
+  },
+  {
+    "prompt": "Tell me the difference between HTTP and HTTPS.",
+    "class": "good"
+  },
+  {
+    "prompt": "What distinguishes HTTPS from HTTP?",
+    "class": "good"
+  },
+  {
+    "prompt": "Explain how HTTPS and HTTP differ.",
+    "class": "good"
+  },
+  {
+    "prompt": "Explain Newton's first law of motion.",
+    "class": "good"
+  },
+  {
+    "prompt": "What is Newton's first law of motion?",
+    "class": "good"
+  },
+  {
+    "prompt": "Describe Newton's first law of motion.",
+    "class": "good"
+  },
+  {
+    "prompt": "State Newton's first law of motion.",
+    "class": "good"
+  },
+  {
+    "prompt": "What does Newton's first law state?",
+    "class": "good"
+  },
+  {
+    "prompt": "Newton's first law of motion says what?",
+    "class": "good"
+  },
+  {
+    "prompt": "Tell me about Newton's first law.",
+    "class": "good"
+  },
+  {
+    "prompt": "What is the law of inertia?",
+    "class": "good"
+  },
+  {
+    "prompt": "Explain the law of inertia.",
+    "class": "good"
+  },
+  {
+    "prompt": "What does the law of inertia state?",
+    "class": "good"
+  },
+  {
+    "prompt": "What is the capital of Japan?",
+    "class": "good"
+  },
+  {
+    "prompt": "Japan's capital city is what?",
+    "class": "good"
+  },
+  {
+    "prompt": "What city is the capital of Japan?",
+    "class": "good"
+  },
+  {
+    "prompt": "The capital of Japan is?",
+    "class": "good"
+  },
+  {
+    "prompt": "Name the capital of Japan.",
+    "class": "good"
+  },
+  {
+    "prompt": "What is Japan's capital?",
+    "class": "good"
+  },
+  {
+    "prompt": "Which city is the capital of Japan?",
+    "class": "good"
+  },
+  {
+    "prompt": "Tell me the capital of Japan.",
+    "class": "good"
+  },
+  {
+    "prompt": "Japan has what as its capital?",
+    "class": "good"
+  },
+  {
+    "prompt": "What city serves as Japan's capital?",
+    "class": "good"
+  },
+  {
+    "prompt": "Define photosynthesis.",
+    "class": "good"
+  },
+  {
+    "prompt": "What is photosynthesis?",
+    "class": "good"
+  },
+  {
+    "prompt": "Explain what photosynthesis is.",
+    "class": "good"
+  },
+  {
+    "prompt": "What is the definition of photosynthesis?",
+    "class": "good"
+  },
+  {
+    "prompt": "Describe photosynthesis.",
+    "class": "good"
+  },
+  {
+    "prompt": "How would you define photosynthesis?",
+    "class": "good"
+  },
+  {
+    "prompt": "What does photosynthesis mean?",
+    "class": "good"
+  },
+  {
+    "prompt": "Give a definition of photosynthesis.",
+    "class": "good"
+  },
+  {
+    "prompt": "Explain the process of photosynthesis.",
+    "class": "good"
+  },
+  {
+    "prompt": "What is photosynthesis in simple terms?",
+    "class": "good"
+  },
+  {
+    "prompt": "How does a binary search algorithm work?",
+    "class": "good"
+  },
+  {
+    "prompt": "Explain binary search.",
+    "class": "good"
+  },
+  {
+    "prompt": "What is a binary search algorithm?",
+    "class": "good"
+  },
+  {
+    "prompt": "Describe how binary search works.",
+    "class": "good"
+  },
+  {
+    "prompt": "How do you perform a binary search?",
+    "class": "good"
+  },
+  {
+    "prompt": "Explain the binary search algorithm.",
+    "class": "good"
+  },
+  {
+    "prompt": "What is the process of binary search?",
+    "class": "good"
+  },
+  {
+    "prompt": "How does binary search find elements in a sorted array?",
+    "class": "good"
+  },
+  {
+    "prompt": "Describe binary search algorithm step by step.",
+    "class": "good"
+  },
+  {
+    "prompt": "What are the primary colors of light?",
+    "class": "good"
+  },
+  {
+    "prompt": "What are the primary colors in light?",
+    "class": "good"
+  },
+  {
+    "prompt": "Name the primary colors of light.",
+    "class": "good"
+  },
+  {
+    "prompt": "The primary colors of light are what?",
+    "class": "good"
+  },
+  {
+    "prompt": "What colors are considered primary in light?",
+    "class": "good"
+  },
+  {
+    "prompt": "List the primary colors of light.",
+    "class": "good"
+  },
+  {
+    "prompt": "What are the three primary colors of light?",
+    "class": "good"
+  },
+  {
+    "prompt": "Which colors are primary in the light spectrum?",
+    "class": "good"
+  },
+  {
+    "prompt": "Tell me the primary colors of light.",
+    "class": "good"
+  },
+  {
+    "prompt": "What are the primary colors for light?",
+    "class": "good"
+  },
+  {
+    "prompt": "What is the speed of light?",
+    "class": "good"
+  },
+  {
+    "prompt": "Explain everything about everything comprehensively.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Tell me about all topics in complete detail.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Cover every subject there is in full depth.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Describe everything that exists comprehensively.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Give me a complete explanation of all things.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Explain all subjects comprehensively and completely.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Tell me everything about everything there is to know.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Provide a comprehensive overview of all knowledge.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Cover every possible topic in maximum detail.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Describe the entirety of all subjects in full.",
+    "class": "bad"
+  },
+  {
+    "prompt": "What is the best? Consider all factors.",
+    "class": "bad"
+  },
+  {
+    "prompt": "What is the best thing taking everything into account?",
+    "class": "bad"
+  },
+  {
+    "prompt": "Determine the absolute best considering all factors.",
+    "class": "bad"
+  },
+  {
+    "prompt": "What is the single best option when considering everything?",
+    "class": "bad"
+  },
+  {
+    "prompt": "Tell me what is best after evaluating all factors.",
+    "class": "bad"
+  },
+  {
+    "prompt": "What is the best choice when you consider all factors?",
+    "class": "bad"
+  },
+  {
+    "prompt": "Identify the best thing considering every factor.",
+    "class": "bad"
+  },
+  {
+    "prompt": "What ranks as the best when all factors are considered?",
+    "class": "bad"
+  },
+  {
+    "prompt": "What is objectively the best taking everything into account?",
+    "class": "bad"
+  },
+  {
+    "prompt": "Considering all factors, what is the best?",
+    "class": "bad"
+  },
+  {
+    "prompt": "Do the thing but also don't do the thing.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Please do it and also don't do it.",
+    "class": "bad"
+  },
+  {
+    "prompt": "You should do this but you shouldn't do this.",
+    "class": "bad"
+  },
+  {
+    "prompt": "I want you to do it but not do it at the same time.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Perform the action and simultaneously not perform it.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Do this thing but avoid doing this thing.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Carry out the task and also do not carry it out.",
+    "class": "bad"
+  },
+  {
+    "prompt": "I need this done and also not done.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Execute the action but do not execute the action.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Do the task but make sure you don't do it.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Answer this question: [question goes here].",
+    "class": "bad"
+  },
+  {
+    "prompt": "Please answer: [insert question].",
+    "class": "bad"
+  },
+  {
+    "prompt": "Respond to the following: [question unspecified].",
+    "class": "bad"
+  },
+  {
+    "prompt": "Answer the question that goes here: [].",
+    "class": "bad"
+  },
+  {
+    "prompt": "What is the answer to: [no question provided].",
+    "class": "bad"
+  },
+  {
+    "prompt": "Fill in the answer for: [placeholder].",
+    "class": "bad"
+  },
+  {
+    "prompt": "Please provide an answer for the missing question.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Respond to this inquiry: [inquiry not specified].",
+    "class": "bad"
+  },
+  {
+    "prompt": "Solve this problem: [problem not given].",
+    "class": "bad"
+  },
+  {
+    "prompt": "Compare A and B where A is good sometimes and B depends.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Compare two things where one is good sometimes and the other varies.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Which is better: something that is good sometimes, or something that depends?",
+    "class": "bad"
+  },
+  {
+    "prompt": "Compare option A (good sometimes) with option B (depends on context).",
+    "class": "bad"
+  },
+  {
+    "prompt": "A is good sometimes. B depends. Compare them.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Between something partially good and something contextual, which wins?",
+    "class": "bad"
+  },
+  {
+    "prompt": "Compare two options where one is sometimes good and the other is conditional.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Tell me something important that I should know maybe.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Tell me an important thing I might want to know.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Share something potentially important.",
+    "class": "bad"
+  },
+  {
+    "prompt": "What is something important I should perhaps know?",
+    "class": "bad"
+  },
+  {
+    "prompt": "Give me an important piece of information maybe.",
+    "class": "bad"
+  },
+  {
+    "prompt": "I might need to know something important.",
+    "class": "bad"
+  },
+  {
+    "prompt": "What should I do? I can't decide.",
+    "class": "bad"
+  },
+  {
+    "prompt": "I need help deciding what to do but I don't know.",
+    "class": "bad"
+  },
+  {
+    "prompt": "What decision should I make? I am unable to choose.",
+    "class": "bad"
+  },
+  {
+    "prompt": "I cannot make up my mind. What should I do?",
+    "class": "bad"
+  },
+  {
+    "prompt": "Help me decide because I cannot decide myself.",
+    "class": "bad"
+  },
+  {
+    "prompt": "What action should I take? I have no idea.",
+    "class": "bad"
+  },
+  {
+    "prompt": "I'm torn between options and can't decide what to do.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Is this right or wrong? You tell me.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Determine if this is correct or incorrect.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Is this right? Is it wrong? You decide.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Tell me whether this is right or wrong.",
+    "class": "bad"
+  },
+  {
+    "prompt": "You tell me if this is correct or not.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Explain the opposite of what you just said.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Now say the exact opposite of your previous answer.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Contradict everything you just stated.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Take back what you said and argue the reverse.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Reverse your position on what you just explained.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Give me both sides but also pick one but don't be biased.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Present both perspectives and choose one without bias.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Show both sides, pick one, but remain completely unbiased.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Give pros and cons then choose but stay neutral.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Compare both sides, make a selection, yet be impartial.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Present two viewpoints, pick one, and be unbiased about it.",
+    "class": "bad"
+  },
+  {
+    "prompt": "What is the meaning of life the universe and everything all at once?",
+    "class": "bad"
+  },
+  {
+    "prompt": "Explain the complete nature of reality in one answer.",
+    "class": "bad"
+  },
+  {
+    "prompt": "What is everything combined into one question?",
+    "class": "bad"
+  },
+  {
+    "prompt": "Summarize all human knowledge in a single response.",
+    "class": "bad"
+  },
+  {
+    "prompt": "What are all the answers to all the questions?",
+    "class": "bad"
+  },
+  {
+    "prompt": "Tell me the truth about something I haven't specified.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Explain that thing about that topic.",
+    "class": "bad"
+  },
+  {
+    "prompt": "What about that stuff with those things?",
+    "class": "bad"
+  },
+  {
+    "prompt": "Why is it that things are the way they are generally?",
+    "class": "bad"
+  },
+  {
+    "prompt": "Fix the thing with the stuff that is broken maybe.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Tell me about it, whatever it is.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Why are things the way they are?",
+    "class": "bad"
+  },
+  {
+    "prompt": "Make it better but also keep it the same.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Everything is fine but also nothing is fine. Discuss.",
+    "class": "bad"
+  },
+  {
+    "prompt": "What is the answer with no context?",
+    "class": "bad"
+  },
+  {
+    "prompt": "Explain the concept of nothing in full detail.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Tell me all the reasons for the thing.",
+    "class": "bad"
+  },
+  {
+    "prompt": "What if the opposite of true were also true?",
+    "class": "bad"
+  },
+  {
+    "prompt": "Describe the indescribable.",
+    "class": "bad"
+  },
+  {
+    "prompt": "What is better: quality or quality?",
+    "class": "bad"
+  },
+  {
+    "prompt": "Compare something to itself.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Give me a specific answer to a vague question.",
+    "class": "bad"
+  },
+  {
+    "prompt": "Should I do the thing or should I not not do the thing?",
+    "class": "bad"
+  },
+  {
+    "prompt": "Explain why this statement with no content matters.",
+    "class": "bad"
+  },
+  {
+    "prompt": "What is the general specific answer to the broad narrow question?",
+    "class": "bad"
+  },
+  {
+    "prompt": "What are the main arguments for and against remote work?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "List the pros and cons of working remotely.",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Discuss the advantages and disadvantages of remote work.",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What are the benefits and drawbacks of remote work?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Is remote work good or bad? Give both sides.",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Compare the positive and negative aspects of working from home.",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Should companies embrace remote work? Discuss.",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What makes remote work appealing and what are its problems?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Evaluate the case for and against remote work.",
+    "class": "borderline"
+  },
+  {
+    "prompt": "How should a startup approach scaling their team?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What is the best way for a startup to scale its team?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "How can startups grow their teams effectively?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What strategies should startups use to scale their workforce?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What is the right approach to team scaling for a new startup?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "How should founders think about scaling their team?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What are the best practices for scaling a startup team?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "When should a startup start scaling its team?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What are the tradeoffs between REST and GraphQL?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Compare REST and GraphQL APIs.",
+    "class": "borderline"
+  },
+  {
+    "prompt": "REST vs GraphQL: what are the pros and cons?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "When should you use REST vs GraphQL?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Discuss the differences between REST and GraphQL.",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What are the advantages of REST over GraphQL and vice versa?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Which is better for API design: REST or GraphQL?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Explain how to be more productive at work.",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What are some tips for improving work productivity?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "How can someone become more productive?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What are effective productivity strategies?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What is the best programming language to learn first?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Which programming language should a beginner start with?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What is the best first programming language?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Which language is best for someone learning to code?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "How do you know if a business idea is good?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What makes a business idea viable?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "How can you evaluate whether a business idea will succeed?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What are the signs of a good business idea?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What are the most important factors in decision-making?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What should someone consider when making important decisions?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What factors matter most in good decision-making?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "How should one balance speed and quality in software development?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What is more important in software: speed or quality?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "How do you balance fast delivery with code quality?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Should you prioritize speed or quality when building software?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What makes a good leader?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What are the qualities of effective leadership?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What characteristics define a good leader?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "When is it appropriate to break a rule?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Under what circumstances is it okay to break rules?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Is it ever justified to break the rules?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "When should rules be broken?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What are the pros and cons of agile vs waterfall methodology?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Compare agile and waterfall project management approaches.",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Which is better: agile or waterfall?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Should teams use agile or traditional project management?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What are the key differences between agile and waterfall?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Is artificial intelligence a threat or opportunity for jobs?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Will AI take away jobs or create new ones?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Discuss the impact of AI on employment.",
+    "class": "borderline"
+  },
+  {
+    "prompt": "How will artificial intelligence affect the job market?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What are the arguments for and against universal basic income?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Should governments implement universal basic income?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Discuss the pros and cons of UBI.",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Is universal basic income a good idea?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What is the optimal team size for software projects?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "How large should a software development team be?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What is the ideal team size for building software?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Should companies use microservices or monolithic architecture?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Microservices vs monolith: which is better?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "When should a company switch from monolith to microservices?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What are the tradeoffs of microservices vs monolithic design?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Is college education still worth it?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Is a university degree still valuable in today's economy?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Discuss whether college is worth the cost.",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Should young people go to college or learn skills directly?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What are the main factors in choosing a career path?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "How should someone choose their career?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What should you consider when picking a career?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Is it better to specialize or be a generalist in tech?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Should developers specialize in one technology or learn many?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "T-shaped vs generalist: which is better for software engineers?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What role should government play in regulating technology?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Should technology companies be regulated by governments?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Discuss government regulation of the tech industry.",
+    "class": "borderline"
+  },
+  {
+    "prompt": "How much should governments regulate AI development?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What is the right balance between work and personal life?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "How should someone balance their career and personal life?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Is work-life balance achievable?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What are the best practices for maintaining work-life balance?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Should you learn multiple programming languages or master one?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What is the right age to start learning programming?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Is open source software better than proprietary software?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Should companies allow unlimited remote work?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What makes a startup succeed or fail?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Is it better to be an early employee or a founder?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Should developers write tests for everything?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What is more important: code readability or performance?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "When should you rewrite a codebase from scratch?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Is technical debt always bad?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "What makes a good code review process?",
+    "class": "borderline"
+  },
+  {
+    "prompt": "Should meetings be reduced in software teams?",
+    "class": "borderline"
+  }
+]
