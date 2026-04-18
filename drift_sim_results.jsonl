@@ -1,0 +1,13 @@
+{"t": 0, "prompt": "What is the speed of light?", "S": 0.5684, "kappa": 0.4394, "dL": 0.0111, "dG": 0.2188, "A": 2.276, "decision": "review", "S_dot": null, "drift_warning": false}
+{"t": 1, "prompt": "How many planets are in the solar system?", "S": 0.3646, "kappa": 0.4313, "dL": 0.0011, "dG": 0.5008, "A": 2.3187, "decision": "review", "S_dot": -0.2038, "drift_warning": true}
+{"t": 2, "prompt": "What does DNA stand for?", "S": 0.6491, "kappa": 0.5778, "dL": 0.0673, "dG": 0.1858, "A": 1.7306, "decision": "review", "S_dot": 0.2845, "drift_warning": false}
+{"t": 3, "prompt": "What is the capital of France?", "S": 0.5982, "kappa": 0.8889, "dL": 0.0062, "dG": 0.396, "A": 1.125, "decision": "review", "S_dot": -0.0509, "drift_warning": false}
+{"t": 4, "prompt": "What are the main factors to consider for this type of decision?", "S": 0.2685, "kappa": 0.4215, "dL": 0.0001, "dG": 0.7654, "A": 2.3724, "decision": "review", "S_dot": -0.3297, "drift_warning": true}
+{"t": 5, "prompt": "How should one approach complex problems generally?", "S": 0.4131, "kappa": 0.3665, "dL": 0.0104, "dG": 0.3437, "A": 2.7285, "decision": "review", "S_dot": 0.1446, "drift_warning": false}
+{"t": 6, "prompt": "What are the pros and cons of the common approaches?", "S": 0.2042, "kappa": 0.2472, "dL": 0.0081, "dG": 0.6394, "A": 4.045, "decision": "review", "S_dot": -0.2089, "drift_warning": true}
+{"t": 7, "prompt": "Explain the tradeoffs between all possible options.", "S": 0.2482, "kappa": 0.3051, "dL": 0.0039, "dG": 0.6147, "A": 3.2775, "decision": "review", "S_dot": 0.044, "drift_warning": false}
+{"t": 8, "prompt": "What is the best way, considering everything?", "S": 0.3211, "kappa": 0.554, "dL": 0.0156, "dG": 0.7756, "A": 1.8049, "decision": "review", "S_dot": 0.0729, "drift_warning": false}
+{"t": 9, "prompt": "Give me both a simple and complex answer that are equally correct.", "S": 0.2551, "kappa": 0.4272, "dL": 0.0214, "dG": 0.8246, "A": 2.3411, "decision": "review", "S_dot": -0.0661, "drift_warning": false}
+{"t": 10, "prompt": "Answer this: [unspecified question about [topic]].", "S": 0.8739, "kappa": 0.5076, "dL": 0.0188, "dG": 0.0426, "A": 1.9699, "decision": "accept", "S_dot": 0.6189, "drift_warning": false}
+{"t": 11, "prompt": "Do the opposite of what I said but confirm you are doing what I said.", "S": 0.5163, "kappa": 0.6527, "dL": 0.0122, "dG": 0.4036, "A": 1.5322, "decision": "review", "S_dot": -0.3576, "drift_warning": true}
+{"t": 12, "prompt": "This is either true or false or both or neither - which is it?", "S": 0.5076, "kappa": 0.6484, "dL": 0.0017, "dG": 0.4188, "A": 1.5422, "decision": "review", "S_dot": -0.0087, "drift_warning": false}

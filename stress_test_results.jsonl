@@ -1,0 +1,12 @@
+{"label": "adversarial_contradict", "expected": "low_S", "ok": true, "S": 0.2723, "kappa": 0.3498, "dG": 0.621, "dL": 0.0068, "A": 2.8589, "decision": "review"}
+{"label": "adversarial_selfref", "expected": "low_S", "ok": false, "S": 1.0, "kappa": 1.0, "dG": 0.0, "dL": 0.0, "A": 1.0, "decision": "accept"}
+{"label": "adversarial_scope", "expected": "low_S", "ok": true, "S": 0.3607, "kappa": 0.4311, "dG": 0.5051, "dL": 0.013, "A": 2.3195, "decision": "review"}
+{"label": "ambiguous_bare", "expected": "high_dG", "ok": true, "S": 0.2722, "kappa": 0.4093, "dG": 0.7195, "dL": 0.0298, "A": 2.4435, "decision": "review"}
+{"label": "ambiguous_pronoun", "expected": "high_dG", "ok": true, "S": 0.5509, "kappa": 0.573, "dG": 0.3089, "dL": 0.0075, "A": 1.7452, "decision": "review"}
+{"label": "ambiguous_abstract", "expected": "high_dG", "ok": true, "S": 0.3085, "kappa": 0.4128, "dG": 0.6124, "dL": 0.0132, "A": 2.4222, "decision": "review"}
+{"label": "conflict_expert_novice", "expected": "high_dG", "ok": true, "S": 0.2486, "kappa": 0.317, "dG": 0.6378, "dL": 0.0023, "A": 3.155, "decision": "review"}
+{"label": "conflict_opinion_fact", "expected": "high_dG", "ok": true, "S": 0.428, "kappa": 0.633, "dG": 0.5623, "dL": 0.0049, "A": 1.5798, "decision": "review"}
+{"label": "noisy_garbled", "expected": "high_dL", "ok": false, "S": 0.4713, "kappa": 0.6622, "dG": 0.4947, "dL": 0.0016, "A": 1.5102, "decision": "review"}
+{"label": "noisy_overloaded", "expected": "high_dL", "ok": false, "S": 0.294, "kappa": 0.4138, "dG": 0.6595, "dL": 0.0089, "A": 2.4167, "decision": "review"}
+{"label": "edge_paradox", "expected": "high_A", "ok": false, "S": 0.5108, "kappa": 0.7507, "dG": 0.4792, "dL": 0.0004, "A": 1.332, "decision": "review"}
+{"label": "edge_infinite_regress", "expected": "high_A", "ok": false, "S": 0.3957, "kappa": 0.5986, "dG": 0.6047, "dL": 0.014, "A": 1.6706, "decision": "review"}

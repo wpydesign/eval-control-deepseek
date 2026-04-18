@@ -76,6 +76,7 @@ def run():
         deepseek_api_key=key,
         n_perturbations=4,
         n_contexts=3,
+        lambda1=0.5, lambda2=1.5, tau_h=0.70, tau_l=0.20,
         survival_log_path="stress_test_log.jsonl",
         drift_history_path="stress_drift.jsonl",
     )
