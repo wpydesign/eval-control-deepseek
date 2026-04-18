@@ -108,7 +108,7 @@ def run(per_class: int, out_path: str):
         deepseek_api_key=key,
         n_perturbations=4,      # fewer calls during generation for speed
         n_contexts=3,
-        lambda1=0.5, lambda2=1.5, tau_h=0.70, tau_l=0.20,
+        lambda1=0.5, lambda2=0.5, tau_h=0.55, tau_l=0.20,
         survival_log_path="calibration_run_log.jsonl",
         drift_history_path="calibration_drift.jsonl",
     )

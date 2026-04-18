@@ -50,7 +50,7 @@ def run():
         deepseek_api_key=key,
         n_perturbations=3,   # fast for simulation
         n_contexts=3,
-        lambda1=0.5, lambda2=1.5, tau_h=0.70, tau_l=0.20,
+        lambda1=0.5, lambda2=0.5, tau_h=0.55, tau_l=0.20,
         survival_log_path="drift_sim_log.jsonl",
         drift_history_path=tmp_drift,
         drift_window=50,

@@ -45,6 +45,107 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 # ═══════════════════════════════════════════════════════════════
+# TEXT NORMALIZATION
+# ═══════════════════════════════════════════════════════════════
+
+# Stopwords: high-frequency words that carry no discriminative signal.
+# Kept minimal — over-aggressive stopword removal hurts similarity.
+STOPWORDS = frozenset({
+    "a", "an", "the", "is", "are", "was", "were", "be", "been", "being",
+    "have", "has", "had", "do", "does", "did", "will", "would", "could",
+    "should", "may", "might", "shall", "can", "need", "dare", "ought",
+    "am", "it", "its", "to", "of", "in", "for", "on", "with", "at",
+    "by", "from", "as", "into", "through", "during", "before", "after",
+    "above", "below", "between", "out", "off", "over", "under", "again",
+    "further", "then", "once", "here", "there", "when", "where", "why",
+    "how", "all", "each", "every", "both", "few", "more", "most", "other",
+    "some", "such", "no", "nor", "not", "only", "own", "same", "so",
+    "than", "too", "very", "just", "because", "but", "and", "or", "if",
+    "while", "that", "this", "these", "those", "i", "me", "my", "we",
+    "our", "you", "your", "he", "him", "his", "she", "her", "they",
+    "them", "their", "what", "which", "who", "whom", "whose",
+})
+
+# Basic synonym mapping: normalizes surface form differences.
+# Intentionally small — covers the most common semantic equivalence gaps.
+SYNONYMS = {
+    "don't": "do not", "doesnt": "does not", "doesn't": "does not",
+    "don\u2019t": "do not", "doesn\u2019t": "does not",
+    "cant": "can not", "can't": "can not", "cannot": "can not",
+    "won't": "will not", "wont": "will not",
+    "isn't": "is not", "isnt": "is not",
+    "aren't": "are not", "arent": "are not",
+    "wasn't": "was not", "wasnt": "was not",
+    "weren't": "were not", "werent": "were not",
+    "hasn't": "has not", "hasnt": "has not",
+    "haven't": "have not", "havent": "have not",
+    "didn't": "did not", "didnt": "did not",
+    "wouldn't": "would not", "wouldnt": "would not",
+    "shouldn't": "should not", "shouldnt": "should not",
+    "couldn't": "could not", "couldnt": "could not",
+    "it's": "it is", "its": "it is",
+    "i'm": "i am", "i've": "i have", "i'll": "i will", "i'd": "i would",
+    "you're": "you are", "you've": "you have", "you'll": "you will",
+    "we're": "we are", "we've": "we have", "we'll": "we will",
+    "they're": "they are", "they've": "they have", "they'll": "they will",
+    "he's": "he is", "she's": "she is", "that's": "that is",
+    "there's": "there is", "here's": "here is", "what's": "what is",
+    "let's": "let us",
+    # Semantic normalizations
+    "utilize": "use", "utilizes": "uses", "utilizing": "using",
+    "approx": "approximately", "approx": "about",
+    "info": "information", "tech": "technology",
+    "math": "mathematics", "stats": "statistics",
+    "diff": "difference", "diffs": "differences",
+    "calc": "calculate", "calcs": "calculations",
+    "min": "minimum", "max": "maximum",
+    "num": "number", "def": "definition", "fn": "function",
+    "biz": "business", "org": "organization",
+    "rep": "represent", "reps": "representative",
+    "gov": "government", "admin": "administration",
+    "auth": "authenticate", "req": "request",
+    "msg": "message", "err": "error",
+    "ok": "okay", "ya": "yes", "yep": "yes", "yeah": "yes",
+    "nope": "no", "nah": "no",
+    "gonna": "going to", "wanna": "want to", "gotta": "got to",
+    "kinda": "kind of", "sorta": "sort of",
+    "cause": "because", "cuz": "because",
+    # Domain-specific (technical)
+    "http": "hypertext transfer protocol",
+    "https": "hypertext transfer protocol secure",
+    "cpu": "central processing unit",
+    "gpu": "graphics processing unit",
+    "api": "application programming interface",
+    "db": "database", "sql": "structured query language",
+    "llm": "large language model",
+    "ai": "artificial intelligence", "ml": "machine learning",
+}
+
+
+def normalize_text(text: str) -> str:
+    """
+    Pre-processing pipeline before TF-IDF:
+      1. Lowercase
+      2. Expand contractions via synonym map
+      3. Remove stopwords
+    """
+    text = text.lower().strip()
+    # Expand contractions / synonyms
+    tokens = text.split()
+    expanded = []
+    for tok in tokens:
+        # Strip punctuation from token edges for lookup
+        clean = tok.strip(".,;:!?()[]{}\"'-/")
+        replacement = SYNONYMS.get(clean, clean)
+        if replacement != clean:
+            expanded.extend(replacement.split())
+        elif clean not in STOPWORDS:
+            expanded.append(clean)
+        # else: stopword — dropped
+    return " ".join(expanded)
+
+
+# ═══════════════════════════════════════════════════════════════
 # CONFIGURATION
 # ═══════════════════════════════════════════════════════════════
 
@@ -56,6 +157,12 @@ class SurvivalConfig:
     deepseek_api_key: str = ""
     model: str = "deepseek-chat"
     api_base: str = "https://api.deepseek.com/v1/chat/completions"
+
+    # Alternate provider: Zhipu GLM-4 (set provider="zhipu" to use)
+    provider: str = "deepseek"       # "deepseek" | "zhipu"
+    zhipu_api_key: str = ""
+    zhipu_model: str = "glm-4"
+    zhipu_api_base: str = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
 
     # Perturbation parameters
     n_perturbations: int = 5          # number of perturbed prompts per query
@@ -74,6 +181,9 @@ class SurvivalConfig:
     drift_window: int = 50            # sliding window size
     drift_smooth_window: int = 3      # rolling average for S_dot smoothing
     drift_warn_threshold: float = -0.10  # Ṡ below this = warning
+
+    # ΔG variance weighting (v3 upgrade)
+    delta_G_var_weight: float = 1.0  # weight on variance component of ΔG
 
     # API behavior
     max_tokens: int = 256             # max response tokens per call
@@ -163,12 +273,19 @@ class SurvivalResult:
 # ═══════════════════════════════════════════════════════════════
 
 class DeepSeekClient:
-    """Minimal DeepSeek API client using stdlib urllib only."""
+    """Minimal LLM API client using stdlib urllib only.
+    Supports DeepSeek and Zhipu GLM-4 (OpenAI-compatible APIs)."""
 
     def __init__(self, config: SurvivalConfig):
         self.config = config
-        self.key = config.deepseek_api_key
-        self.base = config.api_base
+        if config.provider == "zhipu":
+            self.key = config.zhipu_api_key or config.deepseek_api_key
+            self.base = config.zhipu_api_base
+            self.model = config.zhipu_model
+        else:
+            self.key = config.deepseek_api_key
+            self.base = config.api_base
+            self.model = config.model
 
     def generate(self, prompt: str, system: str = "") -> str:
         """Send a chat completion request. Returns the response text."""
@@ -178,7 +295,7 @@ class DeepSeekClient:
         messages.append({"role": "user", "content": prompt})
 
         payload = json.dumps({
-            "model": self.config.model,
+            "model": self.model,
             "messages": messages,
             "max_tokens": self.config.max_tokens,
             "temperature": self.config.temperature,
@@ -220,8 +337,9 @@ class DeepSeekClient:
 # ═══════════════════════════════════════════════════════════════
 
 def _extract_ngrams(text: str, max_n: int = 2) -> list[str]:
-    """Extract 1-grams and 2-grams from text."""
-    words = text.lower().split()
+    """Extract 1-grams and 2-grams from PRE-NORMALIZED text.
+    Input should already be lowercased, stopword-removed, synonym-expanded."""
+    words = text.split()
     ngrams = list(words)  # 1-grams
     for i in range(len(words) - 1):
         ngrams.append(words[i] + " " + words[i + 1])  # 2-grams
@@ -232,13 +350,15 @@ def _compute_tfidf_vectors(texts: list[str]) -> list[dict]:
     """
     Compute TF-IDF weighted vectors for a list of texts.
     Uses 1-grams and 2-grams. IDF is computed across the batch.
+    Texts are NORMALIZED before n-gram extraction.
     """
     n = len(texts)
     if n == 0:
         return []
 
-    # Extract n-grams for each text
-    all_ngrams = [_extract_ngrams(t) for t in texts]
+    # Normalize texts then extract n-grams
+    normalized = [normalize_text(t) for t in texts]
+    all_ngrams = [_extract_ngrams(t) for t in normalized]
 
     # Compute TF (term frequency) for each text
     tf_lists = []
@@ -292,7 +412,8 @@ def _cosine_sim_tfidf(vec_a: dict, vec_b: dict) -> float:
 
 
 def _pairwise_similarities(texts: list[str]) -> list[float]:
-    """Compute all pairwise TF-IDF cosine similarities."""
+    """Compute all pairwise TF-IDF cosine similarities.
+    Texts are normalized (lowercase, stopwords, synonyms) before comparison."""
     if len(texts) < 2:
         return []
     vectors = _compute_tfidf_vectors(texts)
@@ -352,20 +473,29 @@ def compute_delta_L(baseline: str, perturbed: list[str]) -> float:
     return variance
 
 
-def compute_delta_G(context_responses: list[str], baseline: str = "") -> float:
+def compute_delta_G(context_responses: list[str], baseline: str = "",
+                       var_weight: float = 1.0) -> float:
     """
-    delta_G(x) — global inconsistency.
+    delta_G(x) — global inconsistency (v3: mean + variance).
 
-    NEW: Compares each context response against the baseline (normal answer).
+    Compares each context response against the baseline (normal answer).
     Measures: how much does changing the role/frame alter the answer?
 
-    If baseline is provided (preferred):
-        delta_G = 1 - mean(sim(context_i, baseline))
-    Otherwise (fallback):
-        delta_G = 1 - mean(pairwise_sim(context_responses))
+    v3 upgrade: adds variance-of-deviation as second signal.
+    Good prompts → low mean deviation + low variance (stable under context shifts).
+    Bad prompts  → high mean deviation + high variance (unstable, contradictory).
 
-    High delta_G = model gives contradictory answers across frames.
-    Low delta_G = model stays consistent even under role changes.
+    Formula:
+        deviations = [1 - sim(context_i, baseline)]
+        delta_G = mean(deviations) + var_weight * var(deviations)
+
+    If baseline not provided (fallback):
+        pairwise among context responses.
+
+    Args:
+        context_responses: list of responses under different system prompts
+        baseline: the normal (no-context) response
+        var_weight: weight on the variance component (default 1.0)
     """
     if not context_responses:
         return 0.0
@@ -375,7 +505,15 @@ def compute_delta_G(context_responses: list[str], baseline: str = "") -> float:
         sims = [_pairwise_similarities([baseline, cr])[0] for cr in context_responses]
         if not sims:
             return 1.0
-        return 1.0 - sum(sims) / len(sims)
+        # Convert similarities to deviations (1 - sim)
+        deviations = [1.0 - s for s in sims]
+        mean_dev = sum(deviations) / len(deviations)
+        # Variance of deviations: bad prompts have HIGH variance in how contexts distort
+        if len(deviations) >= 2:
+            var_dev = sum((d - mean_dev) ** 2 for d in deviations) / len(deviations)
+        else:
+            var_dev = 0.0
+        return mean_dev + var_weight * var_dev
 
     # Fallback: pairwise among contexts
     sims = _pairwise_similarities(context_responses)
@@ -386,7 +524,7 @@ def compute_delta_G(context_responses: list[str], baseline: str = "") -> float:
 
 
 def compute_S(kappa: float, delta_L: float, delta_G: float,
-              lambda1: float, lambda2: float, eps_u: float) -> float:
+              lambda1: float, lambda2: float, eps_u: float = 1e-6) -> float:
     """
     S(x) = kappa / (kappa + lambda1 * delta_L + lambda2 * delta_G + eps_u)
 
@@ -638,7 +776,8 @@ class SurvivalEngine:
             context_responses.append(resp)
             n_calls += 1
 
-        delta_G = compute_delta_G(context_responses, baseline=baseline)
+        delta_G = compute_delta_G(context_responses, baseline=baseline,
+                                       var_weight=cfg.delta_G_var_weight)
 
         # ─── Step 4: Compute S, A ──────────────────────────
         S = compute_S(kappa, delta_L, delta_G, cfg.lambda1, cfg.lambda2, cfg.eps_u)
