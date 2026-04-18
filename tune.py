@@ -52,7 +52,7 @@ def score_params(dataset, lambda1, lambda2, tau_h, tau_l):
                        lambda1, lambda2)
         rec["S_computed"] = round(S, 4)  # attach for analysis
         decision = decide_gate(S, tau_h, tau_l)
-        label = rec["measured_label"]
+        label = rec.get("intended_class", rec["measured_label"])
         counts[f"{label}_{decision}"] += 1
 
     good_total = counts.get("good_accept", 0) + counts.get("good_review", 0) + counts.get("good_reject", 0)
@@ -76,8 +76,8 @@ def score_params(dataset, lambda1, lambda2, tau_h, tau_l):
     )
 
     # Bonus for class separation: S should differ between classes
-    good_S = [rec["S_computed"] for rec in dataset if rec["measured_label"] == "good"]
-    bad_S = [rec["S_computed"] for rec in dataset if rec["measured_label"] == "bad"]
+    good_S = [rec["S_computed"] for rec in dataset if rec.get("intended_class", rec["measured_label"]) == "good"]
+    bad_S = [rec["S_computed"] for rec in dataset if rec.get("intended_class", rec["measured_label"]) == "bad"]
     if good_S and bad_S:
         mean_good = sum(good_S) / len(good_S)
         mean_bad = sum(bad_S) / len(bad_S)
@@ -99,7 +99,7 @@ def run(dataset_path, out_path):
     print(f"  Loaded {len(dataset)} samples")
 
     from collections import Counter
-    labels = Counter(r["measured_label"] for r in dataset)
+    labels = Counter(r.get("intended_class", r["measured_label"]) for r in dataset)
     print(f"  Labels: {dict(labels)}")
 
     # Grid definition
@@ -184,7 +184,7 @@ def run(dataset_path, out_path):
         rec["S_calibrated"] = round(S, 4)
 
     for label in ["good", "borderline", "bad"]:
-        vals = [rec["S_calibrated"] for rec in dataset if rec["measured_label"] == label]
+        vals = [rec["S_calibrated"] for rec in dataset if rec.get("intended_class", rec["measured_label"]) == label]
         if vals:
             mean = sum(vals) / len(vals)
             mn, mx = min(vals), max(vals)

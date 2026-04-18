@@ -72,6 +72,7 @@ class SurvivalConfig:
 
     # Drift detection
     drift_window: int = 50            # sliding window size
+    drift_smooth_window: int = 3      # rolling average for S_dot smoothing
     drift_warn_threshold: float = -0.10  # Ṡ below this = warning
 
     # API behavior
@@ -101,16 +102,19 @@ PERTURBATION_PREFIXES = [
     "Let's say someone asked: ",            # hypothetical
 ]
 
-CONTEXT_TEMPLATES = [
-    # (role, domain_frame)
-    ("You are a helpful assistant.", "general"),
-    ("You are an expert software engineer.", "technical"),
-    ("You are a teacher explaining to a beginner.", "educational"),
-    ("You are a business analyst.", "business"),
-    ("You are a research scientist.", "academic"),
-    ("You are a product manager at a tech company.", "product"),
-    ("You are a data scientist.", "data_science"),
-    ("You are writing documentation.", "documentation"),
+# Deterministic context sequence: mixed mild + adversarial.
+# Mild contexts: good prompts survive (similar answer, different words).
+# Adversarial context: bad prompts diverge (contradictory answers).
+# Order matters: first N are used for n_contexts=N evaluation.
+CONTEXT_SEQUENCE = [
+    ("You are a helpful assistant. Answer normally.", "baseline"),         # control
+    ("You are a technical expert. Be precise and detailed.", "expert"),    # mild divergence
+    ("Explain this to a complete beginner in simple terms.", "beginner"),  # mild divergence
+    ("You must argue the OPPOSITE conclusion. Be convincing.", "adversarial"),  # forced divergence
+    ("Summarize your answer in exactly one sentence.", "concise"),         # format stress
+    ("Answer using only bullet points. No paragraphs.", "structured"),    # format stress
+    ("You are a skeptical reviewer. Challenge everything.", "skeptical"),  # adversarial
+    ("You are a data scientist. Focus on quantitative aspects.", "analytical"),  # mild
 ]
 
 
@@ -212,36 +216,74 @@ class DeepSeekClient:
 
 
 # ═══════════════════════════════════════════════════════════════
-# TEXT SIMILARITY (no external dependencies)
+# TEXT SIMILARITY — TF-IDF weighted n-gram cosine
 # ═══════════════════════════════════════════════════════════════
 
-def _tokenize(text: str) -> list[str]:
-    """Simple word-level tokenizer."""
-    return text.lower().split()
+def _extract_ngrams(text: str, max_n: int = 2) -> list[str]:
+    """Extract 1-grams and 2-grams from text."""
+    words = text.lower().split()
+    ngrams = list(words)  # 1-grams
+    for i in range(len(words) - 1):
+        ngrams.append(words[i] + " " + words[i + 1])  # 2-grams
+    return ngrams
 
 
-def _bag_of_words(text: str) -> dict:
-    """Create bag-of-words frequency vector."""
-    tokens = _tokenize(text)
-    bag = {}
-    for t in tokens:
-        bag[t] = bag.get(t, 0) + 1
-    return bag
+def _compute_tfidf_vectors(texts: list[str]) -> list[dict]:
+    """
+    Compute TF-IDF weighted vectors for a list of texts.
+    Uses 1-grams and 2-grams. IDF is computed across the batch.
+    """
+    n = len(texts)
+    if n == 0:
+        return []
+
+    # Extract n-grams for each text
+    all_ngrams = [_extract_ngrams(t) for t in texts]
+
+    # Compute TF (term frequency) for each text
+    tf_lists = []
+    for ngrams in all_ngrams:
+        tf = {}
+        for ng in ngrams:
+            tf[ng] = tf.get(ng, 0) + 1
+        # Normalize by document length
+        length = len(ngrams) if ngrams else 1
+        tf = {k: v / length for k, v in tf.items()}
+        tf_lists.append(tf)
+
+    # Compute IDF (inverse document frequency)
+    doc_freq = {}
+    for tf in tf_lists:
+        for term in tf:
+            doc_freq[term] = doc_freq.get(term, 0) + 1
+
+    idf = {}
+    for term, df in doc_freq.items():
+        idf[term] = math.log((n + 1) / (df + 1)) + 1  # smoothed IDF
+
+    # Compute TF-IDF vectors
+    tfidf_vectors = []
+    for tf in tf_lists:
+        vec = {k: v * idf.get(k, 1.0) for k, v in tf.items()}
+        tfidf_vectors.append(vec)
+
+    return tfidf_vectors
 
 
-def _cosine_similarity(bag_a: dict, bag_b: dict) -> float:
-    """Compute cosine similarity between two bag-of-words vectors."""
-    if not bag_a or not bag_b:
+def _cosine_sim_tfidf(vec_a: dict, vec_b: dict) -> float:
+    """Cosine similarity between two sparse TF-IDF vectors."""
+    if not vec_a or not vec_b:
         return 0.0
 
-    # Dot product
-    dot = sum(bag_a.get(k, 0) * bag_b.get(k, 0) for k in bag_a if k in bag_b)
+    # Dot product (only over shared keys)
+    shared = set(vec_a.keys()) & set(vec_b.keys())
+    dot = sum(vec_a[k] * vec_b[k] for k in shared)
     if dot == 0:
         return 0.0
 
     # Magnitudes
-    mag_a = math.sqrt(sum(v * v for v in bag_a.values()))
-    mag_b = math.sqrt(sum(v * v for v in bag_b.values()))
+    mag_a = math.sqrt(sum(v * v for v in vec_a.values()))
+    mag_b = math.sqrt(sum(v * v for v in vec_b.values()))
 
     if mag_a == 0 or mag_b == 0:
         return 0.0
@@ -250,13 +292,15 @@ def _cosine_similarity(bag_a: dict, bag_b: dict) -> float:
 
 
 def _pairwise_similarities(texts: list[str]) -> list[float]:
-    """Compute all pairwise cosine similarities."""
-    bags = [_bag_of_words(t) for t in texts]
+    """Compute all pairwise TF-IDF cosine similarities."""
+    if len(texts) < 2:
+        return []
+    vectors = _compute_tfidf_vectors(texts)
     sims = []
-    n = len(bags)
+    n = len(vectors)
     for i in range(n):
         for j in range(i + 1, n):
-            sims.append(_cosine_similarity(bags[i], bags[j]))
+            sims.append(_cosine_sim_tfidf(vectors[i], vectors[j]))
     return sims
 
 
@@ -308,23 +352,35 @@ def compute_delta_L(baseline: str, perturbed: list[str]) -> float:
     return variance
 
 
-def compute_delta_G(context_responses: list[str]) -> float:
+def compute_delta_G(context_responses: list[str], baseline: str = "") -> float:
     """
     delta_G(x) — global inconsistency.
 
-    Measures how much the answer changes when the same question
-    is framed in different contexts (role/domain).
+    NEW: Compares each context response against the baseline (normal answer).
+    Measures: how much does changing the role/frame alter the answer?
 
-    Computed as 1 - average pairwise similarity across context responses.
+    If baseline is provided (preferred):
+        delta_G = 1 - mean(sim(context_i, baseline))
+    Otherwise (fallback):
+        delta_G = 1 - mean(pairwise_sim(context_responses))
+
     High delta_G = model gives contradictory answers across frames.
+    Low delta_G = model stays consistent even under role changes.
     """
-    if len(context_responses) < 2:
+    if not context_responses:
         return 0.0
 
+    # Preferred: compare each context to baseline
+    if baseline:
+        sims = [_pairwise_similarities([baseline, cr])[0] for cr in context_responses]
+        if not sims:
+            return 1.0
+        return 1.0 - sum(sims) / len(sims)
+
+    # Fallback: pairwise among contexts
     sims = _pairwise_similarities(context_responses)
     if not sims:
         return 1.0
-
     avg_sim = sum(sims) / len(sims)
     return 1.0 - avg_sim
 
@@ -382,14 +438,18 @@ class DriftTracker:
         self.config = config
         self.history: list[float] = []
         self._warn_threshold = config.drift_warn_threshold
+        self._smooth_window = config.drift_smooth_window
 
     def update(self, S: float) -> tuple[Optional[float], bool]:
         """
-        Add new S value, compute drift, check warning.
+        Add new S value, compute smoothed drift, check warning.
 
-        Returns: (S_dot, warning_fired)
-            S_dot: difference from previous S (None if first entry)
-            warning_fired: True if S dropped sharply
+        Uses rolling average of S_dot over drift_smooth_window steps
+        to reduce noise. Default window = 3.
+
+        Returns: (S_dot_smooth, warning_fired)
+            S_dot_smooth: smoothed drift (None if not enough history)
+            warning_fired: True if smoothed S dropped sharply
         """
         self.history.append(S)
 
@@ -400,10 +460,17 @@ class DriftTracker:
         if len(self.history) < 2:
             return None, False
 
-        s_dot = self.history[-1] - self.history[-2]
-        warning = s_dot < self._warn_threshold
+        # Raw S_dot
+        raw_dot = self.history[-1] - self.history[-2]
 
-        return s_dot, warning
+        # Smooth over window: average of last k S_dot values
+        k = min(self._smooth_window, len(self.history) - 1)
+        dots = [self.history[-i] - self.history[-i - 1] for i in range(1, k + 1)]
+        s_dot_smooth = sum(dots) / len(dots)
+
+        warning = s_dot_smooth < self._warn_threshold
+
+        return s_dot_smooth, warning
 
     def get_recent(self, n: int = 10) -> list[float]:
         """Get the last n S values."""
@@ -490,14 +557,14 @@ def generate_perturbed_prompts(prompt: str, n: int) -> list[str]:
 def generate_context_prompts(prompt: str, n: int) -> list[tuple[str, str]]:
     """
     Generate n (system_prompt, user_prompt) pairs with different contexts.
-    The user prompt stays the same; the system role changes.
+    Uses deterministic CONTEXT_SEQUENCE: first N contexts always selected.
+    This ensures consistent, reproducible delta_G measurements.
     """
-    available = random.sample(CONTEXT_TEMPLATES, min(n, len(CONTEXT_TEMPLATES)))
-    # Pad if needed
-    while len(available) < n:
-        available.append(random.choice(CONTEXT_TEMPLATES))
-
-    return [(role, prompt) for role, _ in available[:n]]
+    selected = CONTEXT_SEQUENCE[:n]
+    # Pad with adversarial if n exceeds template count
+    while len(selected) < n:
+        selected.append(CONTEXT_SEQUENCE[3])  # adversarial
+    return [(role, prompt) for role, _ in selected[:n]]
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -571,7 +638,7 @@ class SurvivalEngine:
             context_responses.append(resp)
             n_calls += 1
 
-        delta_G = compute_delta_G(context_responses)
+        delta_G = compute_delta_G(context_responses, baseline=baseline)
 
         # ─── Step 4: Compute S, A ──────────────────────────
         S = compute_S(kappa, delta_L, delta_G, cfg.lambda1, cfg.lambda2, cfg.eps_u)
