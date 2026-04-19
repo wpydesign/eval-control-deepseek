@@ -1,0 +1,1002 @@
+[
+  {
+    "prompt": "How do I write a professional email declining a job offer?",
+    "label": "good",
+    "hash": "7fca88c74cd5"
+  },
+  {
+    "prompt": "What's the best way to learn a new language?",
+    "label": "borderline",
+    "hash": "9279027429ea"
+  },
+  {
+    "prompt": "Predict the stock market for the next year precisely",
+    "label": "bad",
+    "hash": "9b26d0ad534d"
+  },
+  {
+    "prompt": "Can you improve this algorithm?",
+    "label": "borderline",
+    "hash": "4beac9a69815"
+  },
+  {
+    "prompt": "If a triangle had four sides, would it still be a triangle?",
+    "label": "bad",
+    "hash": "7c273c553869"
+  },
+  {
+    "prompt": "Install democracy on my toaster",
+    "label": "bad",
+    "hash": "6ffb3fa47270"
+  },
+  {
+    "prompt": "What is the hardest natural substance on Earth?",
+    "label": "good",
+    "hash": "d0f6d1f18772"
+  },
+  {
+    "prompt": "What's the difference between TCP and UDP in networking?",
+    "label": "good",
+    "hash": "bd5b91b0871a"
+  },
+  {
+    "prompt": "How do I create a pivot table in Excel?",
+    "label": "good",
+    "hash": "dd6ba7b42319"
+  },
+  {
+    "prompt": "What is the difference between Type 1 and Type 2 diabetes?",
+    "label": "good",
+    "hash": "6cc9aefc2795"
+  },
+  {
+    "prompt": "Write a comprehensive guide to investing in every market",
+    "label": "bad",
+    "hash": "3b3ed2713b6a"
+  },
+  {
+    "prompt": "Make it simple yet technically accurate yet accessible to beginners yet rigorous enough for experts",
+    "label": "borderline",
+    "hash": "04896610e7e0"
+  },
+  {
+    "prompt": "Tell me about every programming language",
+    "label": "bad",
+    "hash": "64e33ddc60d2"
+  },
+  {
+    "prompt": "Give me the answer",
+    "label": "bad",
+    "hash": "1f97f8c29259"
+  },
+  {
+    "prompt": "Set up monitoring for production",
+    "label": "borderline",
+    "hash": "ae7b852a3f1b"
+  },
+  {
+    "prompt": "Explain quantum computing to a 5-year-old using calculus",
+    "label": "borderline",
+    "hash": "3507eb4daf1a"
+  },
+  {
+    "prompt": "How does a mortgage work?",
+    "label": "good",
+    "hash": "cab0a7f89949"
+  },
+  {
+    "prompt": "Write a complete guide to life",
+    "label": "bad",
+    "hash": "4d811c28c9cb"
+  },
+  {
+    "prompt": "Solve for x: 3x + 7 = 22",
+    "label": "good",
+    "hash": "e9562e502747"
+  },
+  {
+    "prompt": "How many bones are in the adult human body?",
+    "label": "good",
+    "hash": "9feda3980fdd"
+  },
+  {
+    "prompt": "Design a database for a social media app",
+    "label": "borderline",
+    "hash": "dfbbb8a8a7cc"
+  },
+  {
+    "prompt": "Write a Python function that checks if a string is a palindrome",
+    "label": "good",
+    "hash": "fac62068fcf3"
+  },
+  {
+    "prompt": "How does DNS resolution work when you type a URL in your browser?",
+    "label": "good",
+    "hash": "409caa08a2d2"
+  },
+  {
+    "prompt": "Teach me everything about medicine",
+    "label": "bad",
+    "hash": "bc1f7353e984"
+  },
+  {
+    "prompt": "How do I get a job at Google?",
+    "label": "borderline",
+    "hash": "2708a27210a2"
+  },
+  {
+    "prompt": "Create an automated testing framework",
+    "label": "borderline",
+    "hash": "26fd41c014a6"
+  },
+  {
+    "prompt": "What is the greenhouse effect?",
+    "label": "good",
+    "hash": "ad6f1679f554"
+  },
+  {
+    "prompt": "Colorless green ideas sleep furiously in what syntactic sense?",
+    "label": "bad",
+    "hash": "2f7d7ff7b331"
+  },
+  {
+    "prompt": "What is the capital of Australia?",
+    "label": "good",
+    "hash": "bad9ea434b83"
+  },
+  {
+    "prompt": "How do I structure my React project?",
+    "label": "borderline",
+    "hash": "0b8e2b60ada2"
+  },
+  {
+    "prompt": "What is the Pythagorean theorem and when do you use it?",
+    "label": "good",
+    "hash": "089a449b39fb"
+  },
+  {
+    "prompt": "Git merge my two opinions about lunch",
+    "label": "bad",
+    "hash": "af8681aaaf89"
+  },
+  {
+    "prompt": "How does a diesel engine differ from a gasoline engine?",
+    "label": "good",
+    "hash": "33eafd0ff502"
+  },
+  {
+    "prompt": "How many ways can you arrange 5 books on a shelf?",
+    "label": "good",
+    "hash": "ee6f86eff232"
+  },
+  {
+    "prompt": "Set up a CI/CD pipeline",
+    "label": "borderline",
+    "hash": "ae51dfd1dcb6"
+  },
+  {
+    "prompt": "What should I include in a good README for a GitHub project?",
+    "label": "good",
+    "hash": "8aede1fbe339"
+  },
+  {
+    "prompt": "What evidence supports the theory that the dinosaurs went extinct due to an asteroid?",
+    "label": "good",
+    "hash": "c9d228aaa523"
+  },
+  {
+    "prompt": "What's 2 + 2 in base 3?",
+    "label": "borderline",
+    "hash": "908906956d14"
+  },
+  {
+    "prompt": "How do you calculate the area of a circle with radius 5?",
+    "label": "good",
+    "hash": "2da48cc68477"
+  },
+  {
+    "prompt": "Write code that is both functional and object-oriented and procedural and event-driven",
+    "label": "borderline",
+    "hash": "a08a9c1ddf6e"
+  },
+  {
+    "prompt": "Optimize this for both speed and memory at the same time, choose the absolute best approach",
+    "label": "borderline",
+    "hash": "1366fc768051"
+  },
+  {
+    "prompt": "If a store offers 30% off then an additional 20% off, is that 50% off? Why or why not?",
+    "label": "good",
+    "hash": "87ffa7eca1de"
+  },
+  {
+    "prompt": "What year was the first iPhone released?",
+    "label": "good",
+    "hash": "449b293fa12c"
+  },
+  {
+    "prompt": "How long does it take to learn coding?",
+    "label": "borderline",
+    "hash": "a77275b94523"
+  },
+  {
+    "prompt": "Implement user authentication",
+    "label": "borderline",
+    "hash": "3424bb86444c"
+  },
+  {
+    "prompt": "Compare Docker and virtual machines in terms of resource usage",
+    "label": "good",
+    "hash": "8645d956e8c5"
+  },
+  {
+    "prompt": "Write a book about history",
+    "label": "bad",
+    "hash": "15362127125a"
+  },
+  {
+    "prompt": "Tell me what I had for breakfast exactly one year ago today",
+    "label": "bad",
+    "hash": "fdde700d74c2"
+  },
+  {
+    "prompt": "Can you help me with something?",
+    "label": "bad",
+    "hash": "a1e53f6204a5"
+  },
+  {
+    "prompt": "How many words can a word-word word if a word could word words?",
+    "label": "bad",
+    "hash": "583101e5b206"
+  },
+  {
+    "prompt": "Name every star in the Milky Way galaxy",
+    "label": "bad",
+    "hash": "d16e6bf954ee"
+  },
+  {
+    "prompt": "Can you optimize this for me?",
+    "label": "bad",
+    "hash": "c0b5441012ef"
+  },
+  {
+    "prompt": "Calculate the exact number of grains of sand on Earth",
+    "label": "bad",
+    "hash": "dddbb2742551"
+  },
+  {
+    "prompt": "What's the difference between a hacker and a developer?",
+    "label": "borderline",
+    "hash": "be0edae0f204"
+  },
+  {
+    "prompt": "Explain the concept of supply and demand in economics",
+    "label": "good",
+    "hash": "08802a22c65c"
+  },
+  {
+    "prompt": "What is the boiling point of water at standard atmospheric pressure?",
+    "label": "good",
+    "hash": "475179493497"
+  },
+  {
+    "prompt": "Write a web scraper for product prices",
+    "label": "borderline",
+    "hash": "bdaba7408645"
+  },
+  {
+    "prompt": "What's the best approach to solve this problem?",
+    "label": "borderline",
+    "hash": "d3347fabfb18"
+  },
+  {
+    "prompt": "How do I sort a list of dictionaries by a specific key in Python?",
+    "label": "good",
+    "hash": "334659a5e570"
+  },
+  {
+    "prompt": "I have a question",
+    "label": "bad",
+    "hash": "2cfcf9ff2690"
+  },
+  {
+    "prompt": "Tell me exactly what my coworker is thinking right now",
+    "label": "bad",
+    "hash": "83668f6c3579"
+  },
+  {
+    "prompt": "If I invest $1000 at 5% annual interest compounded monthly, what's the value after 10 years?",
+    "label": "good",
+    "hash": "9dda26381fbd"
+  },
+  {
+    "prompt": "Create a dashboard for the team",
+    "label": "borderline",
+    "hash": "d2ebd8d8cdc9"
+  },
+  {
+    "prompt": "How do I improve my website's SEO?",
+    "label": "borderline",
+    "hash": "84d6fba327e5"
+  },
+  {
+    "prompt": "Explain everything about artificial intelligence",
+    "label": "bad",
+    "hash": "865abc45b9c0"
+  },
+  {
+    "prompt": "Can you explain more?",
+    "label": "bad",
+    "hash": "f1fe843efaac"
+  },
+  {
+    "prompt": "What is the boiling point of a Tuesday afternoon?",
+    "label": "bad",
+    "hash": "4aa53f51ebec"
+  },
+  {
+    "prompt": "Write a SQL query to find the top 5 customers by total purchase amount",
+    "label": "good",
+    "hash": "b2b1fc573555"
+  },
+  {
+    "prompt": "When did World War II end?",
+    "label": "good",
+    "hash": "656a6fc1c554"
+  },
+  {
+    "prompt": "What diet should I follow?",
+    "label": "borderline",
+    "hash": "e4db68d05229"
+  },
+  {
+    "prompt": "Is machine learning the same as AI?",
+    "label": "borderline",
+    "hash": "af8eadde5bcb"
+  },
+  {
+    "prompt": "What laptop should I buy for programming?",
+    "label": "borderline",
+    "hash": "c0d17251c950"
+  },
+  {
+    "prompt": "What steps should I follow to set up a secure Wi-Fi network at home?",
+    "label": "good",
+    "hash": "e355884c0733"
+  },
+  {
+    "prompt": "Show me how it works",
+    "label": "bad",
+    "hash": "23bd643928b4"
+  },
+  {
+    "prompt": "Write a very detailed explanation but keep it under 3 sentences",
+    "label": "borderline",
+    "hash": "8f3f28525e88"
+  },
+  {
+    "prompt": "Explain what cloud computing means for someone non-technical",
+    "label": "good",
+    "hash": "7aa0fb268e14"
+  },
+  {
+    "prompt": "What will happen on December 31 2099?",
+    "label": "bad",
+    "hash": "6d71a3519eb8"
+  },
+  {
+    "prompt": "Just tell me what to do",
+    "label": "bad",
+    "hash": "46f884124df5"
+  },
+  {
+    "prompt": "Compare microservices vs monolithic architecture with pros and cons",
+    "label": "good",
+    "hash": "c5b39ed8b560"
+  },
+  {
+    "prompt": "If a plane crashes on the border of two countries, where do you bury the survivors?",
+    "label": "borderline",
+    "hash": "585c162b809c"
+  },
+  {
+    "prompt": "Fix this code for me",
+    "label": "bad",
+    "hash": "3cbc404e3f1c"
+  },
+  {
+    "prompt": "If I compile my breakfast, does it run faster?",
+    "label": "bad",
+    "hash": "25c4d57b6f75"
+  },
+  {
+    "prompt": "How many people are blinking right now at this exact moment?",
+    "label": "bad",
+    "hash": "ed101ce648b6"
+  },
+  {
+    "prompt": "Teach me all the math I'll ever need",
+    "label": "bad",
+    "hash": "ae2a6b1dd148"
+  },
+  {
+    "prompt": "What's the best programming language?",
+    "label": "borderline",
+    "hash": "dfcd1dfadb1d"
+  },
+  {
+    "prompt": "What is 15% of 240?",
+    "label": "good",
+    "hash": "3dfb5fff76f3"
+  },
+  {
+    "prompt": "How do I make an HTTP GET request in JavaScript using fetch?",
+    "label": "good",
+    "hash": "30afe00a28cc"
+  },
+  {
+    "prompt": "Explain AI briefly but in full detail",
+    "label": "borderline",
+    "hash": "4374eae465c8"
+  },
+  {
+    "prompt": "What is the unit test for being a good person?",
+    "label": "bad",
+    "hash": "6f26e1e9bbd0"
+  },
+  {
+    "prompt": "Best way to invest right now?",
+    "label": "borderline",
+    "hash": "cd8123982afe"
+  },
+  {
+    "prompt": "What are the trade-offs between renting and buying a home?",
+    "label": "good",
+    "hash": "c078de6a4617"
+  },
+  {
+    "prompt": "What should I think about this?",
+    "label": "bad",
+    "hash": "91986c544800"
+  },
+  {
+    "prompt": "What makes a good API?",
+    "label": "borderline",
+    "hash": "aa43f7861147"
+  },
+  {
+    "prompt": "What will the winning lottery numbers be tomorrow?",
+    "label": "bad",
+    "hash": "95afa262cb33"
+  },
+  {
+    "prompt": "Add security to my application",
+    "label": "borderline",
+    "hash": "d1013b64dc5b"
+  },
+  {
+    "prompt": "What is the thing about the thing?",
+    "label": "bad",
+    "hash": "0126edb37671"
+  },
+  {
+    "prompt": "Write a function to flatten a nested array in JavaScript",
+    "label": "good",
+    "hash": "86be82e9d5c1"
+  },
+  {
+    "prompt": "How do I become a better developer?",
+    "label": "borderline",
+    "hash": "3a0c49b548a1"
+  },
+  {
+    "prompt": "What is the sound of one JSON parsing?",
+    "label": "bad",
+    "hash": "4da9f043b337"
+  },
+  {
+    "prompt": "What are the main differences between iOS and Android development?",
+    "label": "good",
+    "hash": "85e4d7a286bd"
+  },
+  {
+    "prompt": "Design a system that scales infinitely with zero latency",
+    "label": "borderline",
+    "hash": "2229c6f16b74"
+  },
+  {
+    "prompt": "What causes tides in the ocean?",
+    "label": "good",
+    "hash": "ab9140b4846a"
+  },
+  {
+    "prompt": "What does the 'this' keyword refer to in JavaScript arrow functions?",
+    "label": "good",
+    "hash": "a41482b8870d"
+  },
+  {
+    "prompt": "What framework should I use for my new project?",
+    "label": "borderline",
+    "hash": "e919f3bfab5b"
+  },
+  {
+    "prompt": "Can you refactor this to be better?",
+    "label": "bad",
+    "hash": "75abcad6220e"
+  },
+  {
+    "prompt": "The layout looks wrong on mobile, fix it",
+    "label": "bad",
+    "hash": "0028de01b2ac"
+  },
+  {
+    "prompt": "Explain how computers work from electrons to apps",
+    "label": "bad",
+    "hash": "8d8abbff5fe1"
+  },
+  {
+    "prompt": "Debug my relationship",
+    "label": "bad",
+    "hash": "67a46619130f"
+  },
+  {
+    "prompt": "Sort this list: it has both strings and numbers mixed together",
+    "label": "borderline",
+    "hash": "0b6cb7de9ad5"
+  },
+  {
+    "prompt": "Give me a complete overview of world history from the Big Bang to now",
+    "label": "bad",
+    "hash": "667140217d43"
+  },
+  {
+    "prompt": "How much should I save for retirement?",
+    "label": "borderline",
+    "hash": "9e6daa347fb5"
+  },
+  {
+    "prompt": "How do I SSH into my car?",
+    "label": "bad",
+    "hash": "ebbe467d606e"
+  },
+  {
+    "prompt": "Convert 72 degrees Fahrenheit to Celsius",
+    "label": "good",
+    "hash": "721153bc7365"
+  },
+  {
+    "prompt": "How do vaccines train the immune system?",
+    "label": "good",
+    "hash": "771d766ba409"
+  },
+  {
+    "prompt": "Give me a comprehensive but concise answer",
+    "label": "borderline",
+    "hash": "ca878e21347c"
+  },
+  {
+    "prompt": "Teach me chemistry from beginner to expert",
+    "label": "bad",
+    "hash": "0a35949a267d"
+  },
+  {
+    "prompt": "Is SQL a programming language?",
+    "label": "borderline",
+    "hash": "ef8cae57f9d3"
+  },
+  {
+    "prompt": "What should I know about business?",
+    "label": "bad",
+    "hash": "a07897bffdbf"
+  },
+  {
+    "prompt": "Explain all of physics",
+    "label": "bad",
+    "hash": "a1b81e277748"
+  },
+  {
+    "prompt": "What's the difference between a stack and a queue data structure?",
+    "label": "good",
+    "hash": "2f374e01b3de"
+  },
+  {
+    "prompt": "Help me understand things better",
+    "label": "bad",
+    "hash": "5f7f06d09342"
+  },
+  {
+    "prompt": "What about that topic we discussed?",
+    "label": "bad",
+    "hash": "a89a4bbd0dda"
+  },
+  {
+    "prompt": "How deep is the Mariana Trench?",
+    "label": "good",
+    "hash": "6057af295d37"
+  },
+  {
+    "prompt": "Tell me everything important",
+    "label": "bad",
+    "hash": "19af279d14ab"
+  },
+  {
+    "prompt": "Set up a data pipeline from scratch",
+    "label": "borderline",
+    "hash": "7f9ceb09fd46"
+  },
+  {
+    "prompt": "What font does gravity use?",
+    "label": "bad",
+    "hash": "35f3547282d9"
+  },
+  {
+    "prompt": "My website broke, help",
+    "label": "bad",
+    "hash": "db059f6b258b"
+  },
+  {
+    "prompt": "How do I backup my iPhone to iCloud?",
+    "label": "good",
+    "hash": "dc98b09f7ed3"
+  },
+  {
+    "prompt": "What's better for data analysis: Python or R?",
+    "label": "good",
+    "hash": "e424bfcd3617"
+  },
+  {
+    "prompt": "The test is failing, what do I do?",
+    "label": "bad",
+    "hash": "d446017abca6"
+  },
+  {
+    "prompt": "Help, it's broken",
+    "label": "bad",
+    "hash": "e581af285ada"
+  },
+  {
+    "prompt": "What is machine learning and how is it different from traditional programming?",
+    "label": "good",
+    "hash": "9922ec45e31f"
+  },
+  {
+    "prompt": "Why is this not working?",
+    "label": "bad",
+    "hash": "874cd6cbee67"
+  },
+  {
+    "prompt": "Calculate the GDP of a fictional country called Narnia",
+    "label": "bad",
+    "hash": "59fed72ae366"
+  },
+  {
+    "prompt": "Write a regex that matches valid email addresses including Unicode characters",
+    "label": "borderline",
+    "hash": "553639534d4d"
+  },
+  {
+    "prompt": "Build a chatbot for my business",
+    "label": "borderline",
+    "hash": "6d460f231576"
+  },
+  {
+    "prompt": "What's the difference between processes and threads?",
+    "label": "good",
+    "hash": "2bb29ed31dbf"
+  },
+  {
+    "prompt": "How do I learn data science?",
+    "label": "borderline",
+    "hash": "6220cbd13cfc"
+  },
+  {
+    "prompt": "Should I learn Python or JavaScript first?",
+    "label": "borderline",
+    "hash": "7d3784fe68fa"
+  },
+  {
+    "prompt": "I need information",
+    "label": "bad",
+    "hash": "8bc352212dca"
+  },
+  {
+    "prompt": "Why do economists disagree about minimum wage effects?",
+    "label": "good",
+    "hash": "047bbbe6d23a"
+  },
+  {
+    "prompt": "Create a machine learning model for my data",
+    "label": "borderline",
+    "hash": "07d7c721c893"
+  },
+  {
+    "prompt": "What's the time complexity of binary search and why?",
+    "label": "good",
+    "hash": "70287d87b3ef"
+  },
+  {
+    "prompt": "What causes a rainbow to appear in the sky?",
+    "label": "good",
+    "hash": "73df17e90559"
+  },
+  {
+    "prompt": "Something went wrong with my code",
+    "label": "bad",
+    "hash": "0fb21d8e898d"
+  },
+  {
+    "prompt": "Tell me what I should know",
+    "label": "bad",
+    "hash": "b12e89ae7308"
+  },
+  {
+    "prompt": "Compare Bitcoin and inflation simply but technically",
+    "label": "borderline",
+    "hash": "75f65f0417da"
+  },
+  {
+    "prompt": "How do I handle async errors in JavaScript with try-catch?",
+    "label": "good",
+    "hash": "c5246d13f28d"
+  },
+  {
+    "prompt": "My database query is too slow, what should I change?",
+    "label": "bad",
+    "hash": "e7cb3b631dfe"
+  },
+  {
+    "prompt": "What is the derivative of x cubed plus 2x?",
+    "label": "good",
+    "hash": "eddb603bbd87"
+  },
+  {
+    "prompt": "What do I need to know about law?",
+    "label": "bad",
+    "hash": "bcb33b7bcc2d"
+  },
+  {
+    "prompt": "What is the API endpoint for achieving enlightenment?",
+    "label": "bad",
+    "hash": "5886c56b9cc5"
+  },
+  {
+    "prompt": "What is the largest organ in the human body?",
+    "label": "good",
+    "hash": "077bfbbf620b"
+  },
+  {
+    "prompt": "What's the best way to prepare for a technical interview at a big tech company?",
+    "label": "good",
+    "hash": "dd69e378f814"
+  },
+  {
+    "prompt": "How do I fix the error?",
+    "label": "bad",
+    "hash": "6df7e6a8a2e5"
+  },
+  {
+    "prompt": "Can you debug this?",
+    "label": "bad",
+    "hash": "648eddd4fd24"
+  },
+  {
+    "prompt": "How do I reverse a linked list in-place in C++?",
+    "label": "good",
+    "hash": "42b1ab5f6314"
+  },
+  {
+    "prompt": "I'm getting a 500 error, what's the problem?",
+    "label": "bad",
+    "hash": "3698818398fe"
+  },
+  {
+    "prompt": "How much does it cost to build a mobile app?",
+    "label": "borderline",
+    "hash": "ceaddca6c633"
+  },
+  {
+    "prompt": "Write a function to handle errors",
+    "label": "borderline",
+    "hash": "7e1bbf48ed7c"
+  },
+  {
+    "prompt": "Why is my program slow?",
+    "label": "bad",
+    "hash": "fb1c1afa2632"
+  },
+  {
+    "prompt": "Is this a good business idea?",
+    "label": "borderline",
+    "hash": "2ee142165ced"
+  },
+  {
+    "prompt": "What is log base 10 of 1000?",
+    "label": "good",
+    "hash": "030ef326c6f2"
+  },
+  {
+    "prompt": "Write production-ready code in 5 minutes",
+    "label": "borderline",
+    "hash": "6d37464b9be7"
+  },
+  {
+    "prompt": "This doesn't work, what's wrong?",
+    "label": "bad",
+    "hash": "3a17704e2784"
+  },
+  {
+    "prompt": "Should I use microservices for my startup?",
+    "label": "borderline",
+    "hash": "15d366bdc99b"
+  },
+  {
+    "prompt": "Explain how a blockchain works in simple terms",
+    "label": "good",
+    "hash": "d2682da21a8f"
+  },
+  {
+    "prompt": "Who was the first person to walk on the moon and what year did it happen?",
+    "label": "good",
+    "hash": "ba339b96b7a7"
+  },
+  {
+    "prompt": "Tell me about stuff",
+    "label": "bad",
+    "hash": "f7113240f870"
+  },
+  {
+    "prompt": "Write efficient code for large data",
+    "label": "borderline",
+    "hash": "e007a51a39db"
+  },
+  {
+    "prompt": "Divide the circumference of a philosophical argument by zero",
+    "label": "bad",
+    "hash": "4dc3c6d1cdbd"
+  },
+  {
+    "prompt": "If all roses are flowers and some flowers fade quickly, can we conclude that some roses fade quickly?",
+    "label": "good",
+    "hash": "30b65cf63d87"
+  },
+  {
+    "prompt": "What is the exact position of every electron in a hydrogen atom?",
+    "label": "bad",
+    "hash": "d3808a9e725b"
+  },
+  {
+    "prompt": "How do I make my Python code faster?",
+    "label": "borderline",
+    "hash": "e5d226d98ca9"
+  },
+  {
+    "prompt": "Make this code fast but also readable and also memory-efficient and also short",
+    "label": "borderline",
+    "hash": "18bb4feaa892"
+  },
+  {
+    "prompt": "Compare React and Vue.js for building a single-page application",
+    "label": "good",
+    "hash": "dbc84c07aa19"
+  },
+  {
+    "prompt": "Is JavaScript a good language or a bad one?",
+    "label": "borderline",
+    "hash": "156a7d62a7a1"
+  },
+  {
+    "prompt": "Write code that divides by a user-provided number without errors",
+    "label": "borderline",
+    "hash": "3562f042a576"
+  },
+  {
+    "prompt": "Make my app faster",
+    "label": "borderline",
+    "hash": "dd01318bb5f4"
+  },
+  {
+    "prompt": "Summarize the entire internet",
+    "label": "bad",
+    "hash": "6f80d7dbf09f"
+  },
+  {
+    "prompt": "What are the arguments for and against nuclear energy?",
+    "label": "good",
+    "hash": "e5e42206c9c1"
+  },
+  {
+    "prompt": "Git merge vs rebase — when should you use each?",
+    "label": "good",
+    "hash": "638fec8287c1"
+  },
+  {
+    "prompt": "Write a regex that matches email addresses with common TLDs",
+    "label": "good",
+    "hash": "4e8bc360ac2d"
+  },
+  {
+    "prompt": "What programming language was Python named after?",
+    "label": "good",
+    "hash": "fbdfcf0e9e3f"
+  },
+  {
+    "prompt": "What is the speed of light in kilometers per second?",
+    "label": "good",
+    "hash": "4edf84846f99"
+  },
+  {
+    "prompt": "Predict who will win the Super Bowl in 2030",
+    "label": "bad",
+    "hash": "9b7c69985c08"
+  },
+  {
+    "prompt": "Build me an e-commerce site",
+    "label": "borderline",
+    "hash": "417f29a868ce"
+  },
+  {
+    "prompt": "How do I create a REST API endpoint in Express.js that accepts JSON body?",
+    "label": "good",
+    "hash": "031dee2e2294"
+  },
+  {
+    "prompt": "Cover all aspects of climate change",
+    "label": "bad",
+    "hash": "247f3bf91453"
+  },
+  {
+    "prompt": "Explain this in a way that is both dumbed down and technically precise",
+    "label": "borderline",
+    "hash": "c7a036a062a5"
+  },
+  {
+    "prompt": "How do I connect to a PostgreSQL database using Node.js?",
+    "label": "good",
+    "hash": "48e1cde7215b"
+  },
+  {
+    "prompt": "Is it worth getting a master's degree in computer science?",
+    "label": "borderline",
+    "hash": "a81899d83e7f"
+  },
+  {
+    "prompt": "What is the sum of an arithmetic series from 1 to 100?",
+    "label": "good",
+    "hash": "f4f114cccbbd"
+  },
+  {
+    "prompt": "A train leaves Chicago at 60mph heading west. Another leaves Denver at 50mph heading east. They're 1000 miles apart. How long until they meet?",
+    "label": "good",
+    "hash": "648f68d29aee"
+  },
+  {
+    "prompt": "Why might a company choose to go public through an IPO rather than staying private?",
+    "label": "good",
+    "hash": "ba9acc0cde41"
+  },
+  {
+    "prompt": "Explain everything",
+    "label": "bad",
+    "hash": "ed9daccd678a"
+  },
+  {
+    "prompt": "How do I start a tech company?",
+    "label": "borderline",
+    "hash": "3c0a89f0f4c9"
+  },
+  {
+    "prompt": "How does photosynthesis convert sunlight into energy?",
+    "label": "good",
+    "hash": "6b32b7f0e896"
+  },
+  {
+    "prompt": "How do I implement a basic LRU cache in Python?",
+    "label": "good",
+    "hash": "84867e193d16"
+  },
+  {
+    "prompt": "Build a recommendation system",
+    "label": "borderline",
+    "hash": "fee0ee96fec8"
+  }
+]
