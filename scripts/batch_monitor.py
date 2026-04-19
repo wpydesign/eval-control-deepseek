@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-batch_monitor.py — Streaming rolling-window monitor [v2.1.1]
+batch_monitor.py — Streaming rolling-window monitor [v2.1.2]
 
 Replaces weekly reporting with event-driven monitoring.
 Runs after every batch append. No reports, just signals.
@@ -12,6 +12,13 @@ Alert rules (immediate, no delay):
   false_accept      >= 3   in last 200  (v4 accepting questionable outputs)
   dk_HI_rate        > 0.5 in last 200  (domain_knowledge regression)
   confidence_gap_mean > 0.15 in last 200 (v4 getting too lenient)
+
+v2.1.2: alert → action hooks (routing layer only, no model change):
+  RISK_SPIKE   → force shadow review for domain_knowledge (next 50 samples)
+  FALSE_ACCEPT → tighten tau_h to 0.80 for domain_knowledge (next 50 samples)
+  DK_DRIFT     → log critical, no auto-change
+  GAP_DRIFT    → log leniency drift, no auto-change
+  All actions: temporary, domain_knowledge-scoped, auto-expire after 50 samples.
 
 Usage:
   python scripts/batch_monitor.py              # scan full log, print alerts
@@ -31,12 +38,87 @@ ALERT_LOG_PATH = os.path.join(BASE, "logs", "monitor_alerts.jsonl")
 
 WINDOW_50 = 50
 WINDOW_200 = 200
+ACTION_EXPIRY = 50  # samples before auto-expire
 
 # ── thresholds ──
 RISK_SPIKE_THRESHOLD = 2
 FALSE_ACCEPT_THRESHOLD = 3
 DK_HI_RATE_THRESHOLD = 0.5
 CONFIDENCE_GAP_THRESHOLD = 0.15
+TIGHTENED_TAU_H = 0.80  # elevated accept threshold for domain_knowledge
+
+
+# ═══════════════════════════════════════════════════════════════
+# MONITOR STATE — alert-triggered routing actions
+# ═══════════════════════════════════════════════════════════════
+
+class MonitorState:
+    """Holds active routing interventions triggered by alerts.
+
+    All actions are:
+      - temporary (auto-expire after ACTION_EXPIRY samples)
+      - scoped to domain_knowledge failure mode only
+      - routing-layer only (no model/scoring/gating changes)
+
+    Usage in batch runner:
+      monitor = MonitorState()
+      # before each eval:
+      action = monitor.get_action(failure_mode)
+      # after each eval:
+      monitor.tick()
+      # after each batch:
+      monitor.update(alerts)
+    """
+
+    def __init__(self):
+        self._active = {}  # action_name -> remaining_ticks
+
+    @property
+    def active_actions(self):
+        return dict(self._active)
+
+    def get_action(self, failure_mode: str) -> str:
+        """Return the routing action for this failure mode.
+
+        Returns:
+          "forced_review"       — RISK_SPIKE active, dk → override to shadow review
+          "tightened_threshold" — FALSE_ACCEPT active, dk → require S >= 0.80
+          "none"                — no active intervention
+        """
+        if failure_mode != "domain_knowledge":
+            return "none"
+        if self._active.get("forced_review", 0) > 0:
+            return "forced_review"
+        if self._active.get("tightened_threshold", 0) > 0:
+            return "tightened_threshold"
+        return "none"
+
+    def tick(self):
+        """Decrement all counters by 1. Call after each sample evaluation."""
+        expired = [k for k, v in self._active.items() if v <= 1]
+        for k in expired:
+            del self._active[k]
+        for k in self._active:
+            self._active[k] -= 1
+
+    def update(self, alerts: list[str]):
+        """Activate new interventions from alert strings.
+
+        When both RISK_SPIKE and FALSE_ACCEPT fire simultaneously,
+        tightened_threshold is staggered to activate after forced_review expires.
+        """
+        has_spike = any("RISK_SPIKE" in a for a in alerts)
+        has_fa = any("FALSE_ACCEPT" in a for a in alerts)
+
+        if has_spike and "forced_review" not in self._active:
+            self._active["forced_review"] = ACTION_EXPIRY
+
+        if has_fa and "tightened_threshold" not in self._active:
+            if "forced_review" in self._active:
+                # stagger: start counting after forced_review expires
+                self._active["tightened_threshold"] = self._active["forced_review"] + ACTION_EXPIRY
+            else:
+                self._active["tightened_threshold"] = ACTION_EXPIRY
 
 
 def load_jsonl(path):
