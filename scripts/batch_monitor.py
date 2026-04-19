@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-batch_monitor.py — Streaming rolling-window monitor [v2.1.4]
+batch_monitor.py — Streaming rolling-window monitor [v2.1.5]
 
 Replaces weekly reporting with event-driven monitoring.
 Runs after every batch append. No reports, just signals.
@@ -22,9 +22,11 @@ v2.1.2: alert → action hooks (routing layer only, no model change):
 
 v2.1.4: persistent cross-run memory + suppression:
   - monitor_stats.json tracks cumulative effective/ineffective counts per action
-  - if ineffective/total > 0.5, action is SUPPRESSED (not activated)
-  - suppression events logged with monitor_action="suppressed"
-  - enables experience-aware control across runs
+  - if total >= 5 and ineffective/total > 0.5, action is SUPPRESSED (not activated)
+  - 0.9 decay applied on load (recent performance > old history)
+  - suppression events logged with action, suppressed, rate, total
+  - minimum evidence threshold prevents premature suppression from early noise
+  - enables stable, adaptive control across runs
 
 Usage:
   python scripts/batch_monitor.py              # scan full log, print alerts
@@ -45,6 +47,8 @@ EFFECTIVENESS_PATH = os.path.join(BASE, "logs", "monitor_effectiveness.jsonl")
 MONITOR_STATS_PATH = os.path.join(BASE, "logs", "monitor_stats.json")
 SUPPRESSION_LOG_PATH = os.path.join(BASE, "logs", "monitor_suppressions.jsonl")
 SUPPRESSION_THRESHOLD = 0.5  # suppress if ineffective_rate > 50%
+MIN_EVIDENCE = 5              # minimum total evaluations before suppression kicks in
+DECAY_FACTOR = 0.9            # multiplicative decay on load (recent > old)
 
 WINDOW_50 = 50
 WINDOW_200 = 200
@@ -71,7 +75,8 @@ class MonitorState:
       - routing-layer only (no model/scoring/gating changes)
 
     v2.1.3: tracks per-action effectiveness (pre/post metrics + expiry evaluation).
-    v2.1.4: persistent cross-run memory (monitor_stats.json) + suppression.
+    v2.1.4: persistent cross-run memory + suppression.
+    v2.1.5: minimum evidence threshold (>=5) + 0.9 decay on load + enriched suppression log.
 
     Usage in batch runner:
       monitor = MonitorState()
@@ -134,6 +139,16 @@ class MonitorState:
                 for key in ("effective", "ineffective"):
                     if key not in data[action_name]:
                         data[action_name][key] = 0
+
+            # v2.1.5: apply decay — recent performance > old history
+            # Simple multiplicative decay, no timestamps needed
+            for action_name in data:
+                old_eff = data[action_name]["effective"]
+                old_ineff = data[action_name]["ineffective"]
+                if old_eff > 0 or old_ineff > 0:
+                    data[action_name]["effective"] = max(0, int(round(old_eff * DECAY_FACTOR)))
+                    data[action_name]["ineffective"] = max(0, int(round(old_ineff * DECAY_FACTOR)))
+
             return data
         except (json.JSONDecodeError, OSError):
             return default
@@ -150,36 +165,46 @@ class MonitorState:
     def _is_suppressed(self, action_name: str) -> bool:
         """Check if action should be suppressed due to historical ineffectiveness.
 
-        Suppress if ineffective_rate > SUPPRESSION_THRESHOLD (50%)
-        AND at least 2 total evaluations (avoid suppressing on first result).
+        Suppress if:
+          - total evaluations >= MIN_EVIDENCE (avoid premature suppression from early noise)
+          - AND ineffective_rate > SUPPRESSION_THRESHOLD (50%)
+
+        v2.1.5: raised minimum evidence from 2 to 5.
         """
         s = self._stats.get(action_name, {})
         effective = s.get("effective", 0)
         ineffective = s.get("ineffective", 0)
         total = effective + ineffective
-        if total < 2:
+        if total < MIN_EVIDENCE:
             return False  # not enough data to suppress
         if total == 0:
             return False
         return (ineffective / total) > SUPPRESSION_THRESHOLD
 
     def _log_suppression(self, action_name: str, reason: str):
-        """Log a suppression event to monitor_suppressions.jsonl."""
-        entry = {
-            "action": action_name,
-            "reason": reason,
-            "stats_snapshot": dict(self._stats.get(action_name, {})),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        }
-        self._suppressed_events.append(entry)
-        ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
+        """Log a suppression event to monitor_suppressions.jsonl.
+
+        v2.1.5: enriched format with rate and total for decision confidence.
+        """
         s = self._stats.get(action_name, {})
         eff = s.get("effective", 0)
         ineff = s.get("ineffective", 0)
         total = eff + ineff
-        rate = ineff / total if total > 0 else 0
+        rate = round(ineff / total, 2) if total > 0 else 0.0
+
+        entry = {
+            "action": action_name,
+            "suppressed": True,
+            "rate": rate,
+            "total": total,
+            "reason": reason,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+        self._suppressed_events.append(entry)
+
+        ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
         print(f"  [{ts}] [SUPPRESSED] {action_name}: {reason} "
-              f"(ineffective_rate={rate:.0%}, {eff}e/{ineff}i)")
+              f"(ineffective_rate={rate:.0%}, total={total}, {eff}e/{ineff}i)")
         try:
             os.makedirs(os.path.dirname(SUPPRESSION_LOG_PATH), exist_ok=True)
             with open(SUPPRESSION_LOG_PATH, "a") as f:
