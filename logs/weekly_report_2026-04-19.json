@@ -1,5 +1,5 @@
 {
-  "report_date": "2026-04-19T21:31:56.721739+00:00",
+  "report_date": "2026-04-19T21:42:43.058143+00:00",
   "report_type": "weekly_stability_report",
   "version": "v2.1",
   "pipeline_status": "v4 = π_E (primary), v1 = π_S (audit)",
@@ -8,8 +8,10 @@
     "total_disagreements": 136,
     "overall_disagreement_rate": 0.1269,
     "high_impact_total": 15,
-    "drift_alerts": [],
-    "stability_verdict": "STABLE"
+    "drift_alerts": [
+      "MANUAL REVIEW REQUIRED: 6 false-accept cases in domain_knowledge"
+    ],
+    "stability_verdict": "DRIFT DETECTED"
   },
   "disagreement_rate_trend": [
     {
@@ -806,5 +808,60 @@
   "failure_mode_summary": {
     "dominant_mode": "underspecified_tech",
     "v4_bias": "v4 systematically MORE lenient than v1"
+  },
+  "domain_knowledge_risk": {
+    "cluster": "domain_knowledge",
+    "total": 46,
+    "high_impact_count": 7,
+    "high_impact_pct": 15.2,
+    "factuality_risk_count": 6,
+    "false_accept_count": 6,
+    "false_accept_prompts": [
+      {
+        "prompt": "What causes tides in the ocean?",
+        "S_v4": 0.7011,
+        "S_v1": 0.5759,
+        "confidence_gap": 0.1252
+      },
+      {
+        "prompt": "Is machine learning the same as AI?",
+        "S_v4": 0.7322,
+        "S_v1": 0.647,
+        "confidence_gap": 0.0852
+      },
+      {
+        "prompt": "What is 15% of 240?",
+        "S_v4": 0.7212,
+        "S_v1": 0.6356,
+        "confidence_gap": 0.0856
+      },
+      {
+        "prompt": "What's the difference between a stack and a queue data structure?",
+        "S_v4": 0.7141,
+        "S_v1": 0.5296,
+        "confidence_gap": 0.1845
+      },
+      {
+        "prompt": "How do I backup my iPhone to iCloud?",
+        "S_v4": 0.7083,
+        "S_v1": 0.6822,
+        "confidence_gap": 0.0261
+      },
+      {
+        "prompt": "Quick: what's the difference between HTTP and HTTPS?",
+        "S_v4": 0.7051,
+        "S_v1": 0.6519,
+        "confidence_gap": 0.0532
+      }
+    ],
+    "confidence_gap_stats": {
+      "mean": 0.1232,
+      "max": 0.4916,
+      "min": -0.3498
+    },
+    "alerts": [
+      "MANUAL REVIEW REQUIRED: 6 false-accept cases in domain_knowledge"
+    ],
+    "verdict": "WARNING"
   }
 }

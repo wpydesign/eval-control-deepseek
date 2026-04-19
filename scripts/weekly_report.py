@@ -169,6 +169,85 @@ def safety_rule_effectiveness(disagreement_cases):
     }
 
 
+def domain_knowledge_risk_alerts(disagreement_cases):
+    """v2.1.1: Domain knowledge-specific risk monitoring.
+    
+    Alert rules (observability only, NO policy changes):
+      1. domain_knowledge HI% > 50% → regression risk
+      2. false_accept_cases >= 3 in dataset → require manual review
+    """
+    dk = [c for c in disagreement_cases if c.get("failure_mode") == "domain_knowledge"]
+    
+    if not dk:
+        return {
+            "cluster": "domain_knowledge",
+            "total": 0,
+            "high_impact_count": 0,
+            "high_impact_pct": 0,
+            "factuality_risk_count": 0,
+            "false_accept_count": 0,
+            "confidence_gap_stats": {"mean": 0, "max": 0, "min": 0},
+            "alerts": [],
+            "verdict": "NO_DATA",
+        }
+    
+    dk_hi = [c for c in dk if c.get("is_high_impact")]
+    dk_hi_pct = len(dk_hi) / len(dk) * 100
+    
+    # False accept: v4=accept AND high-impact (v4 accepted something questionable)
+    false_accepts = [c for c in dk if c.get("v4", {}).get("decision") == "accept"
+                     and c.get("is_high_impact")]
+    
+    # Factuality risk: the strictest flag
+    factuality_risks = [c for c in dk if c.get("factuality_risk_flag")]
+    
+    # Confidence gap stats
+    gaps = [c.get("confidence_gap", c.get("S_delta", 0)) for c in dk]
+    mean_gap = sum(gaps) / len(gaps) if gaps else 0
+    
+    # ── Alert rules ──
+    alerts = []
+    
+    # Rule 1: domain_knowledge HI% > 50%
+    if dk_hi_pct > 50:
+        alerts.append(
+            f"REGRESSION RISK: domain_knowledge HI% = {dk_hi_pct:.1f}% > 50% threshold"
+        )
+    
+    # Rule 2: false_accept >= 3
+    if len(false_accepts) >= 3:
+        alerts.append(
+            f"MANUAL REVIEW REQUIRED: {len(false_accepts)} false-accept cases in domain_knowledge"
+        )
+    
+    verdict = "CLEAR"
+    if len(alerts) >= 2:
+        verdict = "CRITICAL — IMMEDIATE ACTION"
+    elif len(alerts) == 1:
+        verdict = "WARNING"
+    
+    return {
+        "cluster": "domain_knowledge",
+        "total": len(dk),
+        "high_impact_count": len(dk_hi),
+        "high_impact_pct": round(dk_hi_pct, 1),
+        "factuality_risk_count": len(factuality_risks),
+        "false_accept_count": len(false_accepts),
+        "false_accept_prompts": [
+            {"prompt": c.get("prompt", "")[:80], "S_v4": c.get("v4", {}).get("S", 0),
+             "S_v1": c.get("v1", {}).get("S", 0), "confidence_gap": c.get("confidence_gap", 0)}
+            for c in false_accepts
+        ],
+        "confidence_gap_stats": {
+            "mean": round(mean_gap, 4),
+            "max": round(max(gaps), 4) if gaps else 0,
+            "min": round(min(gaps), 4) if gaps else 0,
+        },
+        "alerts": alerts,
+        "verdict": verdict,
+    }
+
+
 def metrics_history_trend(metrics_records):
     """Extract week-over-week metrics from daily_metrics.jsonl."""
     if not metrics_records:
@@ -218,6 +297,7 @@ def main():
     gap_trend = gap_drift_trend(disagreement_cases)
     safety = safety_rule_effectiveness(disagreement_cases)
     metrics_hist = metrics_history_trend(metrics_records)
+    dk_risk = domain_knowledge_risk_alerts(disagreement_cases)
 
     # Week-over-week comparison
     latest_disc_rate = disc_rate[-1]["rate"] if disc_rate else 0
@@ -282,7 +362,18 @@ def main():
             "dominant_mode": fma.get("summary", {}).get("dominant_mode", "N/A") if fma else "run failure_mode_analysis.py first",
             "v4_bias": fma.get("summary", {}).get("v4_systematic_bias", "N/A") if fma else "N/A",
         } if fma else None,
+
+        # v2.1.1: domain_knowledge risk monitoring
+        "domain_knowledge_risk": dk_risk,
     }
+
+    # Merge dk_risk alerts into overview drifts
+    if dk_risk.get("alerts"):
+        for alert in dk_risk["alerts"]:
+            if alert not in drifts:
+                drifts.append(alert)
+        report["overview"]["drift_alerts"] = drifts
+        report["overview"]["stability_verdict"] = "DRIFT DETECTED" if drifts else "STABLE"
 
     # Save timestamped report
     date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -336,6 +427,19 @@ def main():
         print(f"\n  FAILURE MODES")
         print(f"    Dominant mode:          {fma['summary']['dominant_mode']}")
         print(f"    v4 systematic bias:     {fma['summary']['v4_systematic_bias']}")
+
+    # v2.1.1: domain_knowledge risk section
+    print(f"\n  DOMAIN_KNOWLEDGE RISK MONITORING")
+    print(f"    Total cases:             {dk_risk['total']}")
+    print(f"    High-impact:             {dk_risk['high_impact_count']} ({dk_risk['high_impact_pct']:.1f}%)")
+    print(f"    Factuality risk flags:   {dk_risk['factuality_risk_count']}")
+    print(f"    False accepts:           {dk_risk['false_accept_count']}")
+    cg = dk_risk['confidence_gap_stats']
+    print(f"    Confidence gap:          mean={cg['mean']:.4f}  [{cg['min']:.4f}, {cg['max']:.4f}]")
+    print(f"    Verdict:                 {dk_risk['verdict']}")
+    if dk_risk['alerts']:
+        for a in dk_risk['alerts']:
+            print(f"    ALERT: {a}")
 
     print(f"\n  Report saved: {report_path}")
 

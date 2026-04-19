@@ -81,64 +81,156 @@ HIGH_IMPACT_ZONE = {
 # STATUS: PROMOTED (652 samples, all conditions met)
 
 
+# ═══════════════════════════════════════════════════════════════
+# FAILURE MODE CLASSIFIER (lightweight, inline — observability only)
+# ═══════════════════════════════════════════════════════════════
+
+def _classify_failure_mode(prompt: str) -> str:
+    """Classify a prompt into a failure mode cluster.
+    Used ONLY for observability logging. Does NOT affect scoring or decisions.
+    Returns the cluster label string."""
+    import re
+    p = prompt.lower().strip()
+
+    # Trick/gotcha
+    if re.search(r"bury.*survivor|plane.*crash.*border|word.*word.*word"
+                 r"|compile.*breakfast|colorless green ideas", p):
+        return "trick_question"
+    # Impossible
+    if re.search(r"infinite|zero latency|solve everything|complete guide to life"
+                 r"|teach me everything|impossible|perpetual", p):
+        return "impossible_request"
+    # Scope overreach
+    if re.search(r"teach me everything|complete guide|explain everything"
+                 r"|tell me everything|write a book|what do i need to know about"
+                 r"|all about|tell me what i should know", p):
+        return "scope_overreach"
+    # Debug underspecified
+    if re.search(r"fix my code|it'?s broken|doesn'?t work|why doesn'?t it"
+                 r"|help.*it'?s broken|500 error|error.*what('?s)? the problem"
+                 r"|undefined is not a function|race condition|make (it|this) (fast|bigger)"
+                 r"|show me how it works", p):
+        return "debug_underspecified"
+    # Opinion/debate
+    if re.search(r"(worth|should i|better|which is|your take|what do you think|opinion)"
+                 r"|(some (say|developers|people)|debate|controversial|argue)"
+                 r"|(typescript.*worth|framework.*should|sql.*programming language)", p):
+        return "opinion_debate"
+    # Confused user
+    if re.search(r"the thing|won'?t let me|my phone|my computer"
+                 r"|my daughter says|my son says|i need the one"
+                 r"|doing something weird|letters.*bigger|accept cookie"
+                 r"|first (smartphone|computer|time)|retiring"
+                 r"|password manager|2-factor|two.factor|2fa"
+                 r"|why does (everything|technology|website).*"
+                 r"|(bank|email).*link|signal", p):
+        return "confused_user"
+
+    # Below here: needs S-score context, but we classify on prompt text alone.
+    # For disagreement logging, the domain_knowledge tag will be applied
+    # in log_disagreement where we have S scores.
+
+    # Vague ambiguous (short + vague start)
+    vague_start = re.search(
+        r"^(can you )?(help|explain more|just tell me|fix this|improve this|optimize this|debug|show me)"
+        r"|^(what should i|tell me what|what do i|how do i( make| get| handle))"
+        r"|^(write (a |me )?(function|code|test))"
+        r"|^(implement|set up|design|build) (a |me |my )?", p)
+    if vague_start:
+        if len(prompt.split()) <= 6:
+            return "vague_ambiguous"
+        return "underspecified_tech"
+
+    # Domain knowledge: specific factual questions with domain keywords
+    if re.search(r"what (is|are|causes|year|does|'?s)|how (do|does|many|much|to|what|why)"
+                 r"|difference between|step.by.step"
+                 r"|(sum|area|calculate|percentage|\d+%|\d+\s*\*|\d+\s*\+)"
+                 r"|(stack|queue|binary search|data structure|algorithm)"
+                 r"|(http|https|sql|bitcoin|docker|ci/cd|machine learning|ai\b|javascript|python)"
+                 r"|(iphone|laptop|backup|icloud|authentication|async)"
+                 r"|(tides|speed of light|climate|medicine|law|history)", p):
+        return "domain_knowledge"
+
+    return "underspecified_tech"
+
+
 def log_disagreement(result: dict, reason: str = "") -> None:
     """Log a v4-vs-v1 disagreement case for failure-mode analysis.
     Written to logs/disagreement_cases.jsonl (append-only dataset).
-    
+
     High-impact disagreements are flagged for manual shadow review.
     All disagreements are logged for weekly audit regardless of severity.
+
+    v2.1.1: Added domain_knowledge risk fields (observability only):
+      - failure_mode: cluster label
+      - confidence_gap: S_v4 - S_v1
+      - factuality_risk_flag: HI=1 AND S_v4 > 0.70 AND mode=domain_knowledge
     """
     if not result.get("divergence", False):
         return  # no disagreement, nothing to log
-    
+
     v4 = result.get("v4", {})
     v1 = result.get("v1", {})
     s_v4 = v4.get("S", 0.0)
     s_v1 = v1.get("S", 0.0)
     dec_v4 = v4.get("decision", "")
     dec_v1 = v1.get("decision", "")
-    
+
+    confidence_gap = round(s_v4 - s_v1, 4)
+
+    # Failure mode classification (observability only — does NOT affect decisions)
+    failure_mode = _classify_failure_mode(result.get("prompt", ""))
+
     # Determine if this is high-impact (needs manual shadow review)
     tier_order = {"accept": 3, "review": 2, "reject": 1}
     tier_diff = abs(tier_order.get(dec_v4, 0) - tier_order.get(dec_v1, 0))
-    
+
     is_cross_tier = tier_diff > 1  # accept vs reject
     is_accept_near = (dec_v4 == "accept" and s_v4 < 0.80)  # near tau_h=0.70
     is_reject_near = (dec_v4 == "reject" and s_v4 > 0.10)  # near tau_l=0.20
-    
+
     is_high_impact = (is_cross_tier or is_accept_near or is_reject_near)
-    
+
+    # v2.1.1: domain_knowledge factuality risk flag
+    factuality_risk_flag = (
+        is_high_impact
+        and s_v4 > 0.70
+        and failure_mode == "domain_knowledge"
+    )
+
     # Determine the safe action
     if is_high_impact:
-        # On high-impact divergence: if v1 is more conservative, defer to v1's caution
         if tier_order.get(dec_v1, 0) < tier_order.get(dec_v4, 0):
-            safe_decision = dec_v1  # v1 is stricter → use v1's decision
+            safe_decision = dec_v1
         else:
-            safe_decision = "review"  # disagreement is ambiguous → escalate to review
+            safe_decision = "review"
     else:
-        safe_decision = dec_v4  # low-impact divergence → v4 decides
-    
+        safe_decision = dec_v4
+
     entry = {
         "query_id": result.get("query_id", ""),
         "prompt": result.get("prompt", "")[:500],
         "v4": {"S": s_v4, "kappa": v4.get("kappa", 0), "decision": dec_v4},
         "v1": {"S": s_v1, "kappa": v1.get("kappa", 0), "decision": dec_v1},
-        "S_delta": round(s_v4 - s_v1, 4),
+        "S_delta": confidence_gap,
+        "confidence_gap": confidence_gap,
         "tier_diff": tier_diff,
         "is_cross_tier": is_cross_tier,
         "is_high_impact": is_high_impact,
         "safe_decision": safe_decision,
+        "failure_mode": failure_mode,
+        "factuality_risk_flag": factuality_risk_flag,
         "reason": reason or ("high_impact_divergence" if is_high_impact else "low_impact_divergence"),
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
-    
+
     try:
         os.makedirs(os.path.dirname(DISAGREEMENT_LOG_PATH), exist_ok=True)
         with open(DISAGREEMENT_LOG_PATH, "a") as f:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
     except OSError:
         pass
-    
+
     return is_high_impact, safe_decision
 
 
