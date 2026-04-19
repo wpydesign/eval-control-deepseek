@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-batch_monitor.py — Streaming rolling-window monitor [v2.1.2]
+batch_monitor.py — Streaming rolling-window monitor [v2.1.3]
 
 Replaces weekly reporting with event-driven monitoring.
 Runs after every batch append. No reports, just signals.
@@ -35,6 +35,7 @@ from collections import deque
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DISAGREEMENT_PATH = os.path.join(BASE, "logs", "disagreement_cases.jsonl")
 ALERT_LOG_PATH = os.path.join(BASE, "logs", "monitor_alerts.jsonl")
+EFFECTIVENESS_PATH = os.path.join(BASE, "logs", "monitor_effectiveness.jsonl")
 
 WINDOW_50 = 50
 WINDOW_200 = 200
@@ -60,29 +61,38 @@ class MonitorState:
       - scoped to domain_knowledge failure mode only
       - routing-layer only (no model/scoring/gating changes)
 
+    v2.1.3: tracks per-action effectiveness (pre/post metrics + expiry evaluation).
+
     Usage in batch runner:
       monitor = MonitorState()
       # before each eval:
       action = monitor.get_action(failure_mode)
-      # after each eval:
+      # after each eval (feed sample signals):
+      monitor.record_sample(is_dk, factuality_risk)
       monitor.tick()
       # after each batch:
-      monitor.update(alerts)
+      monitor.update(alerts, pre_false_accept, pre_risk_spike)
     """
 
     def __init__(self):
-        self._active = {}  # action_name -> remaining_ticks
+        self._active = {}       # action_name -> remaining_ticks
+        self._tracking = {}     # action_name -> {false_accept: int, risk_spike: int, samples: int}
+        self._consecutive_fail = {"forced_review": 0, "tightened_threshold": 0}
 
     @property
     def active_actions(self):
         return dict(self._active)
 
+    @property
+    def consecutive_failures(self):
+        return dict(self._consecutive_fail)
+
     def get_action(self, failure_mode: str) -> str:
         """Return the routing action for this failure mode.
 
         Returns:
-          "forced_review"       — RISK_SPIKE active, dk → override to shadow review
-          "tightened_threshold" — FALSE_ACCEPT active, dk → require S >= 0.80
+          "forced_review"       — RISK_SPIKE active, dk -> override to shadow review
+          "tightened_threshold" — FALSE_ACCEPT active, dk -> require S >= 0.80
           "none"                — no active intervention
         """
         if failure_mode != "domain_knowledge":
@@ -93,32 +103,126 @@ class MonitorState:
             return "tightened_threshold"
         return "none"
 
+    def record_sample(self, is_dk: bool, factuality_risk: bool):
+        """Feed per-sample signals for active action tracking.
+
+        Call BEFORE tick() so the sample counts against the current window.
+
+        Args:
+            is_dk: True if this sample was classified as domain_knowledge
+            factuality_risk: True if factuality_risk_flag was set
+        """
+        for action_name in self._active:
+            if action_name not in self._tracking:
+                self._tracking[action_name] = {"false_accept": 0, "risk_spike": 0, "samples": 0}
+            t = self._tracking[action_name]
+            t["samples"] += 1
+            if factuality_risk:
+                t["false_accept"] += 1
+                if is_dk:
+                    t["risk_spike"] += 1
+
     def tick(self):
-        """Decrement all counters by 1. Call after each sample evaluation."""
+        """Decrement all counters by 1. Evaluate + log expired actions. Call after record_sample."""
         expired = [k for k, v in self._active.items() if v <= 1]
         for k in expired:
+            self._evaluate_action(k)
             del self._active[k]
         for k in self._active:
             self._active[k] -= 1
 
-    def update(self, alerts: list[str]):
+    def update(self, alerts: list[str], pre_false_accept: int = 0, pre_risk_spike: int = 0):
         """Activate new interventions from alert strings.
 
         When both RISK_SPIKE and FALSE_ACCEPT fire simultaneously,
         tightened_threshold is staggered to activate after forced_review expires.
+
+        Args:
+            alerts: list of alert strings from scan()
+            pre_false_accept: current false_accept count in window_200 (snapshot before action)
+            pre_risk_spike: current risk_spike count in window_50 (snapshot before action)
         """
         has_spike = any("RISK_SPIKE" in a for a in alerts)
         has_fa = any("FALSE_ACCEPT" in a for a in alerts)
 
         if has_spike and "forced_review" not in self._active:
             self._active["forced_review"] = ACTION_EXPIRY
+            self._tracking["forced_review"] = {
+                "pre_false_accept": pre_false_accept,
+                "pre_risk_spike": pre_risk_spike,
+                "false_accept": 0,
+                "risk_spike": 0,
+                "samples": 0,
+            }
 
         if has_fa and "tightened_threshold" not in self._active:
             if "forced_review" in self._active:
-                # stagger: start counting after forced_review expires
                 self._active["tightened_threshold"] = self._active["forced_review"] + ACTION_EXPIRY
             else:
                 self._active["tightened_threshold"] = ACTION_EXPIRY
+            self._tracking["tightened_threshold"] = {
+                "pre_false_accept": pre_false_accept,
+                "pre_risk_spike": pre_risk_spike,
+                "false_accept": 0,
+                "risk_spike": 0,
+                "samples": 0,
+            }
+
+    def _evaluate_action(self, action_name: str):
+        """Evaluate action effectiveness on expiry. Log to monitor_effectiveness.jsonl."""
+        t = self._tracking.pop(action_name, {})
+        if not t or "pre_false_accept" not in t:
+            return
+
+        post_fa = t.get("false_accept", 0)
+        post_spike = t.get("risk_spike", 0)
+        pre_fa = t.get("pre_false_accept", 0)
+        pre_spike = t.get("pre_risk_spike", 0)
+        samples = t.get("samples", 0)
+
+        # Effectiveness: did the action reduce its target metric?
+        if action_name == "forced_review":
+            delta = post_spike - pre_spike
+            result = "effective" if delta < 0 else "neutral" if delta == 0 else "ineffective"
+        else:  # tightened_threshold
+            delta = post_fa - pre_fa
+            result = "effective" if delta < 0 else "neutral" if delta == 0 else "ineffective"
+
+        # Track consecutive failures
+        if result == "ineffective":
+            self._consecutive_fail[action_name] = self._consecutive_fail.get(action_name, 0) + 1
+        else:
+            self._consecutive_fail[action_name] = 0
+
+        redesign_flag = self._consecutive_fail[action_name] >= 2
+
+        entry = {
+            "action": action_name,
+            "result": result,
+            "delta": delta,
+            "samples": samples,
+            "pre_false_accept": pre_fa,
+            "post_false_accept": post_fa,
+            "pre_risk_spike": pre_spike,
+            "post_risk_spike": post_spike,
+            "consecutive_failures": self._consecutive_fail[action_name],
+            "needs_redesign": redesign_flag,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+
+        try:
+            os.makedirs(os.path.dirname(EFFECTIVENESS_PATH), exist_ok=True)
+            with open(EFFECTIVENESS_PATH, "a") as f:
+                f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        except OSError:
+            pass
+
+        # Print outcome
+        ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
+        redesign_tag = " NEEDS_REDESIGN" if redesign_flag else ""
+        print(f"  [{ts}] [EFFECTIVENESS] {action_name}: {result} (delta={delta:+d}, samples={samples}){redesign_tag}")
+
+        return result
 
 
 def load_jsonl(path):
@@ -137,11 +241,18 @@ def load_jsonl(path):
 
 
 def scan(cases):
-    """Scan disagreement cases over rolling windows. Return list of alert strings."""
+    """Scan disagreement cases over rolling windows.
+
+    Returns:
+        alerts: list of alert strings
+        pre_metrics: dict with current false_accept_count and risk_spike_count
+            (snapshot before any action — fed to monitor.update())
+    """
     alerts = []
+    pre_metrics = {"false_accept_count": 0, "risk_spike_count": 0}
 
     if not cases:
-        return alerts
+        return alerts, pre_metrics
 
     w200 = cases[-WINDOW_200:]
     w50 = cases[-WINDOW_50:]
@@ -159,6 +270,10 @@ def scan(cases):
     # ── window_50 metrics ──
     risk_spike_count = sum(1 for c in w50 if c.get("factuality_risk_flag"))
 
+    # Snapshot pre-action metrics
+    pre_metrics["false_accept_count"] = len(false_accepts)
+    pre_metrics["risk_spike_count"] = risk_spike_count
+
     # ── alert checks ──
     if risk_spike_count >= RISK_SPIKE_THRESHOLD:
         alerts.append(f"[ALERT] type=RISK_SPIKE count={risk_spike_count} window=50")
@@ -172,7 +287,7 @@ def scan(cases):
     if gap_mean > CONFIDENCE_GAP_THRESHOLD:
         alerts.append(f"[ALERT] type=GAP_DRIFT gap={gap_mean:.4f} window=200")
 
-    return alerts
+    return alerts, pre_metrics
 
 
 def log_alerts(alerts, path=ALERT_LOG_PATH):
@@ -217,7 +332,7 @@ def main():
 
     if not watch:
         # One-shot scan
-        alerts = scan(cases)
+        alerts, pre_metrics = scan(cases)
         if alerts:
             for a in alerts:
                 print(a)
@@ -239,7 +354,7 @@ def main():
             if len(cases) > last_n:
                 new_count = len(cases) - last_n
                 last_n = len(cases)
-                alerts = scan(cases)
+                alerts, pre_metrics = scan(cases)
                 print_status(cases)
                 for a in alerts:
                     print(a)

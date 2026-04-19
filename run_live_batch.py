@@ -346,6 +346,10 @@ def main():
                 action_flag = f" [MONITOR:{monitor_action}]" if monitor_action != "none" else ""
                 print(f"S_v4={s_v4:.3f} {dec_v4} v1={dec_v1} [{div}]{review_flag}{action_flag}")
                 batch_results.append(result)
+                # v2.1.3: feed sample signals for effectiveness tracking
+                is_dk = (fm == "domain_knowledge")
+                fact_risk = result.get("v4", {}).get("decision") == "accept" and is_dk and result.get("v4", {}).get("S", 0) > 0.70
+                monitor.record_sample(is_dk, fact_risk)
                 monitor.tick()  # v2.1.2: decrement action expiry counters
             except (FuturesTimeoutError, TimeoutError):
                 print(f"TIMEOUT (>{API_TIMEOUT}s) — SKIP")
@@ -370,7 +374,7 @@ def main():
         append_metrics(metrics, METRICS_PATH)
         all_results.extend(batch_results)
 
-        # v2.1.2: streaming monitor (rolling windows 50/200) + action hooks
+        # v2.1.3: streaming monitor + action hooks + effectiveness tracking
         try:
             disc_path = os.path.join(DIR, "logs", "disagreement_cases.jsonl")
             disc_cases = []
@@ -379,12 +383,16 @@ def main():
                     line = line.strip()
                     if line:
                         disc_cases.append(json.loads(line))
-            alerts = scan(disc_cases)
+            alerts, pre_metrics = scan(disc_cases)
             print_status(disc_cases)
             for a in alerts:
                 print(f"  {a}")
             log_alerts(alerts)
-            monitor.update(alerts)  # v2.1.2: activate routing interventions
+            monitor.update(
+                alerts,
+                pre_false_accept=pre_metrics["false_accept_count"],
+                pre_risk_spike=pre_metrics["risk_spike_count"],
+            )
             if monitor.active_actions:
                 print(f"  [MONITOR] active_actions={monitor.active_actions}")
         except Exception as e:
