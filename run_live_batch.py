@@ -343,6 +343,24 @@ def main():
         append_metrics(metrics, METRICS_PATH)
         all_results.extend(batch_results)
 
+        # v2.1.1: streaming monitor (rolling windows 50/200)
+        try:
+            from scripts.batch_monitor import scan, log_alerts, print_status
+            disc_path = os.path.join(DIR, "logs", "disagreement_cases.jsonl")
+            disc_cases = []
+            with open(disc_path) as df:
+                for line in df:
+                    line = line.strip()
+                    if line:
+                        disc_cases.append(json.loads(line))
+            alerts = scan(disc_cases)
+            print_status(disc_cases)
+            for a in alerts:
+                print(f"  {a}")
+            log_alerts(alerts)
+        except Exception as e:
+            print(f"  (monitor skipped: {e})")
+
         print(f"  (metrics appended to {METRICS_PATH})\n")
 
     # Summary
