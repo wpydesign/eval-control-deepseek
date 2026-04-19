@@ -1,0 +1,59 @@
+{"batch_number": 0, "total_batches": 0, "batch_size": 200, "bad_accepted": 1, "good_rejected": 0, "divergence_rate": 0.23, "divergent_count": 46, "s_mean": 0.4832, "s_min": 0.1649, "s_max": 0.8491, "accept_count": 16, "review_count": 178, "reject_count": 6, "pending_before_batch": 200, "note": "migrated from shadow_200_log.jsonl, decisions recomputed at tau_h=0.70", "timestamp": "2026-04-19T09:05:37.162691+00:00"}
+{"batch_number": 1, "batch_size": 7, "bad_accepted": 0, "good_rejected": 0, "divergence_rate": 0.1429, "divergent_count": 1, "s_mean": 0.431, "note": "live batch - old api_log prompts", "timestamp": "2026-04-19T09:20:48.628812+00:00"}
+{"chunk": 1, "chunk_size": 5, "bad_accepted": 0, "good_rejected": 0, "divergence_rate": 0.0, "divergent_count": 0, "s_mean": 0.4726, "cumulative_done": 5, "cumulative_skip": 0, "timestamp": "2026-04-19T16:56:49.173114+00:00"}
+{"chunk": 2, "chunk_size": 5, "bad_accepted": 0, "good_rejected": 0, "divergence_rate": 0.0, "divergent_count": 0, "s_mean": 0.4382, "cumulative_done": 10, "cumulative_skip": 0, "timestamp": "2026-04-19T16:59:14.838132+00:00"}
+{"chunk": 3, "chunk_size": 4, "bad_accepted": 0, "good_rejected": 0, "divergence_rate": 0.0, "divergent_count": 0, "s_mean": 0.3933, "cumulative_done": 14, "cumulative_skip": 1, "timestamp": "2026-04-19T17:02:01.823618+00:00"}
+{"chunk": 4, "chunk_size": 5, "bad_accepted": 0, "good_rejected": 0, "divergence_rate": 0.0, "divergent_count": 0, "s_mean": 0.4689, "cumulative_done": 19, "cumulative_skip": 1, "timestamp": "2026-04-19T17:04:07.501707+00:00"}
+{"chunk": 7, "size": 7, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.0, "done": 7, "skip": 0, "remaining": 238, "ts": "2026-04-19T17:27:12.231187+00:00"}
+{"chunk": 6, "size": 6, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.3333, "done": 6, "skip": 0, "remaining": 231, "ts": "2026-04-19T17:29:22.933608+00:00"}
+{"chunk": 6, "size": 6, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.0, "done": 6, "skip": 0, "remaining": 225, "ts": "2026-04-19T17:31:29.861750+00:00"}
+{"chunk": 6, "size": 6, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.3333, "done": 6, "skip": 0, "remaining": 216, "ts": "2026-04-19T17:36:13.497198+00:00"}
+{"chunk": 6, "size": 6, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.3333, "done": 6, "skip": 0, "remaining": 210, "ts": "2026-04-19T17:38:05.421694+00:00"}
+{"chunk": 6, "size": 6, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.1667, "done": 6, "skip": 0, "remaining": 204, "ts": "2026-04-19T17:40:00.614928+00:00"}
+{"chunk": 7, "size": 7, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.0, "done": 7, "skip": 0, "remaining": 202, "ts": "2026-04-19T17:40:30.459123+00:00"}
+{"chunk": 5, "size": 5, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.2, "done": 5, "skip": 1, "remaining": 198, "ts": "2026-04-19T17:41:50.249076+00:00"}
+{"chunk": 6, "size": 6, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.1667, "done": 6, "skip": 0, "remaining": 196, "ts": "2026-04-19T17:42:22.392521+00:00"}
+{"chunk": 6, "size": 6, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.3333, "done": 6, "skip": 0, "remaining": 196, "ts": "2026-04-19T17:42:31.184620+00:00"}
+{"chunk": 6, "size": 6, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.1667, "done": 6, "skip": 0, "remaining": 192, "ts": "2026-04-19T17:43:36.062033+00:00"}
+{"chunk": 5, "size": 5, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.0, "done": 5, "skip": 0, "remaining": 191, "ts": "2026-04-19T17:44:09.599532+00:00"}
+{"chunk": 6, "size": 6, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.0, "done": 6, "skip": 0, "remaining": 190, "ts": "2026-04-19T17:44:24.891108+00:00"}
+{"chunk": 5, "size": 5, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.0, "done": 5, "skip": 0, "remaining": 188, "ts": "2026-04-19T17:45:05.300689+00:00"}
+{"chunk": 5, "size": 5, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.2, "done": 5, "skip": 0, "remaining": 187, "ts": "2026-04-19T17:45:21.243739+00:00"}
+{"chunk": 6, "size": 6, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.0, "done": 6, "skip": 0, "remaining": 185, "ts": "2026-04-19T17:45:58.988589+00:00"}
+{"chunk": 6, "size": 6, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.1667, "done": 6, "skip": 0, "remaining": 184, "ts": "2026-04-19T17:46:14.931210+00:00"}
+{"chunk": 7, "size": 7, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.0, "done": 7, "skip": 0, "remaining": 181, "ts": "2026-04-19T17:46:55.969961+00:00"}
+{"chunk": 6, "size": 6, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.0, "done": 6, "skip": 0, "remaining": 182, "ts": "2026-04-19T17:47:02.440523+00:00"}
+{"chunk": 7, "size": 7, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.1429, "done": 7, "skip": 0, "remaining": 178, "ts": "2026-04-19T17:47:50.173237+00:00"}
+{"chunk": 8, "size": 8, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.375, "done": 8, "skip": 0, "remaining": 176, "ts": "2026-04-19T17:47:59.160673+00:00"}
+{"chunk": 8, "size": 8, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.375, "done": 8, "skip": 0, "remaining": 173, "ts": "2026-04-19T17:48:45.323790+00:00"}
+{"chunk": 8, "size": 8, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.125, "done": 8, "skip": 0, "remaining": 173, "ts": "2026-04-19T17:48:56.075895+00:00"}
+{"chunk": 7, "size": 7, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.1429, "done": 7, "skip": 0, "remaining": 172, "ts": "2026-04-19T17:49:16.989077+00:00"}
+{"chunk": 7, "size": 7, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.2857, "done": 7, "skip": 0, "remaining": 169, "ts": "2026-04-19T17:49:50.348540+00:00"}
+{"chunk": 7, "size": 7, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.0, "done": 7, "skip": 0, "remaining": 166, "ts": "2026-04-19T17:50:43.471524+00:00"}
+{"chunk": 6, "size": 6, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.0, "done": 6, "skip": 0, "remaining": 167, "ts": "2026-04-19T17:50:53.125791+00:00"}
+{"chunk": 5, "size": 5, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.0, "done": 5, "skip": 1, "remaining": 165, "ts": "2026-04-19T17:51:15.016487+00:00"}
+{"chunk": 5, "size": 5, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.2, "done": 5, "skip": 0, "remaining": 165, "ts": "2026-04-19T17:51:19.725453+00:00"}
+{"chunk": 6, "size": 6, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.1667, "done": 6, "skip": 0, "remaining": 160, "ts": "2026-04-19T17:52:34.630896+00:00"}
+{"chunk": 7, "size": 7, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.4286, "done": 7, "skip": 0, "remaining": 159, "ts": "2026-04-19T17:52:35.015308+00:00"}
+{"chunk": 7, "size": 7, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.2857, "done": 7, "skip": 0, "remaining": 158, "ts": "2026-04-19T17:53:02.225599+00:00"}
+{"chunk": 6, "size": 6, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.3333, "done": 6, "skip": 0, "remaining": 159, "ts": "2026-04-19T17:53:13.424182+00:00"}
+{"chunk": 7, "size": 7, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.0, "done": 7, "skip": 0, "remaining": 156, "ts": "2026-04-19T17:53:36.848888+00:00"}
+{"chunk": 5, "size": 5, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.0, "done": 5, "skip": 1, "remaining": 153, "ts": "2026-04-19T17:54:29.033317+00:00"}
+{"chunk": 6, "size": 6, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.0, "done": 6, "skip": 0, "remaining": 152, "ts": "2026-04-19T17:54:44.198239+00:00"}
+{"chunk": 6, "size": 6, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.1667, "done": 6, "skip": 0, "remaining": 151, "ts": "2026-04-19T17:55:05.472984+00:00"}
+{"chunk": 7, "size": 7, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.2857, "done": 7, "skip": 0, "remaining": 149, "ts": "2026-04-19T17:55:29.993915+00:00"}
+{"chunk": 7, "size": 7, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.0, "done": 7, "skip": 0, "remaining": 145, "ts": "2026-04-19T17:56:37.160964+00:00"}
+{"chunk": 8, "size": 8, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.0, "done": 8, "skip": 0, "remaining": 143, "ts": "2026-04-19T17:56:49.265903+00:00"}
+{"chunk": 8, "size": 8, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.125, "done": 8, "skip": 0, "remaining": 141, "ts": "2026-04-19T17:57:10.465684+00:00"}
+{"chunk": 14, "size": 14, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.0714, "done": 14, "skip": 0, "remaining": 129, "ts": "2026-04-19T17:58:39.839514+00:00"}
+{"chunk": 13, "size": 13, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.3846, "done": 13, "skip": 0, "remaining": 128, "ts": "2026-04-19T17:58:56.582282+00:00"}
+{"chunk": 7, "size": 7, "bad_accepted": 0, "good_rejected": 0, "div_rate": 0.1429, "done": 7, "skip": 0, "remaining": 120, "ts": "2026-04-19T18:00:45.774858+00:00"}
+{"total": 583, "bad_accepted_v4": 1, "bad_accepted_v1": 1, "good_rejected_v4": 0, "good_rejected_v1": 1, "divergence_rate": 0.1715, "divergent_count": 100, "action": "keep running", "timestamp": "2026-04-19T18:25:17.301501+00:00"}
+{"total": 606, "bad_accepted_v4": 1, "bad_accepted_v1": 1, "good_rejected_v4": 0, "good_rejected_v1": 1, "divergence_rate": 0.17, "divergent_count": 103, "action": "keep running", "timestamp": "2026-04-19T19:37:52.316073+00:00"}
+{"total": 652, "bad_accepted_v4": 1, "bad_accepted_v1": 1, "good_rejected_v4": 0, "good_rejected_v1": 1, "divergence_rate": 0.1641, "divergent_count": 107, "action": "keep running", "timestamp": "2026-04-19T19:49:38.334463+00:00"}
+{"total": 675, "bad_accepted_v4": 1, "bad_accepted_v1": 1, "good_rejected_v4": 0, "good_rejected_v1": 1, "divergence_rate": 0.1644, "divergent_count": 111, "action": "keep running", "timestamp": "2026-04-19T19:54:46.922050+00:00"}
+{"total": 835, "bad_accepted_v4": 1, "bad_accepted_v1": 1, "good_rejected_v4": 0, "good_rejected_v1": 1, "divergence_rate": 0.1533, "divergent_count": 128, "action": "keep running", "timestamp": "2026-04-19T20:12:36.711320+00:00"}
+{"total": 979, "bad_accepted_v4": 1, "bad_accepted_v1": 1, "good_rejected_v4": 0, "good_rejected_v1": 1, "divergence_rate": 0.1481, "divergent_count": 145, "action": "keep running", "timestamp": "2026-04-19T20:25:47.855154+00:00"}
+{"total": 1013, "bad_accepted_v4": 1, "bad_accepted_v1": 1, "good_rejected_v4": 0, "good_rejected_v1": 1, "divergence_rate": 0.1451, "divergent_count": 147, "action": "keep running", "timestamp": "2026-04-19T20:28:04.218235+00:00"}
+{"total": 1072, "bad_accepted_v4": 1, "bad_accepted_v1": 1, "good_rejected_v4": 0, "good_rejected_v1": 1, "divergence_rate": 0.139, "divergent_count": 149, "disagreement_cases_total": 0, "high_impact_cases": 0, "cross_tier_cases": 0, "safe_decision_dist": {}, "epsilon": 0.02, "action": "v4 STABLE as \u03c0_E \u2014 v1 remains \u03c0_S (audit only)", "warnings": [], "cadence": "weekly", "timestamp": "2026-04-19T21:26:31.564233+00:00"}
+{"total": 1072, "bad_accepted_v4": 1, "bad_accepted_v1": 1, "good_rejected_v4": 0, "good_rejected_v1": 1, "divergence_rate": 0.139, "divergent_count": 149, "disagreement_cases_total": 149, "high_impact_cases": 17, "cross_tier_cases": 0, "safe_decision_dist": {"review": 148, "accept": 1}, "epsilon": 0.02, "action": "v4 STABLE as \u03c0_E \u2014 v1 remains \u03c0_S (audit only)", "warnings": [], "cadence": "weekly", "timestamp": "2026-04-19T21:26:42.112218+00:00"}

@@ -1,0 +1,34 @@
+{
+  "total": 500,
+  "sources": {
+    "shadow": 200,
+    "api_log": 7,
+    "generated": 293
+  },
+  "v4": {
+    "bad_accepted": 1,
+    "good_rejected": 0,
+    "accept": 16,
+    "review": 474,
+    "reject": 10,
+    "S_mean": 0.4165,
+    "S_min": 0.1558,
+    "S_max": 0.8491
+  },
+  "v1": {
+    "bad_accepted": 1,
+    "good_rejected": 1,
+    "accept": 14,
+    "review": 411,
+    "reject": 75,
+    "S_mean": 0.3465,
+    "S_min": 0.0,
+    "S_max": 0.866
+  },
+  "divergence_rate": 0.174,
+  "divergent_count": 87,
+  "decision": "KEEP v4",
+  "reason": "v4 bad_accepted(1) <= v1(1) AND good_rejected(0) <= v1(1) AND divergence > 0",
+  "timestamp": "2026-04-19T17:54:17.500557+00:00",
+  "note": "288 generated + 207 real = 495 raw prompts, 5 additional from api_log captures during eval"
+}

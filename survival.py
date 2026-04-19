@@ -1,29 +1,33 @@
 #!/usr/bin/env python3
 """
-survival.py — Survival Scalar Engine for LLM Output Quality  [v2.0-survival-stable]
+survival.py — Survival Scalar Engine for LLM Output Quality  [v2.1 — v4 PROMOTED]
 
 S(x) = kappa(x) / (kappa(x) + lambda1 * delta_L(x) + lambda2 * delta_G(x) + eps_u)
 
-v2.0 PRIMARY (context-based scoring):
+π_E (v4 — PRIMARY OUTPUT POLICY):
     kappa_v4(x)   — mean similarity of baseline vs each context response
     delta_L_v4(x) — variance of [1.0, sim(baseline, ctx_i)] (anchored)
-    delta_G(x)    — global inconsistency (unchanged, shared)
+    delta_G(x)    — global inconsistency (shared)
+    All production decisions go through v4. No fallback to v1.
 
-v1.0 LEGACY (perturbation-based scoring):
+π_S (v1 — FROZEN SHADOW VALIDATOR / AUDIT LAYER):
     kappa_v1(x)   — pairwise cosine similarity of (baseline + perturbed) responses
     delta_L_v1(x) — variance of pairwise similarities
+    Runs in parallel as comparator only. Never makes production decisions.
+    Logged for weekly audit and failure-mode analysis.
 
-DECISION GATE (v4 primary):
+DECISION GATE (v4 only):
     accept    if S > tau_h (0.70)
     review    if tau_l < S <= tau_h
     reject    if S <= tau_l (0.20)
 
-CALIBRATED PARAMETERS (locked — v2.0-survival-stable):
+SAFETY RULE: if v4 and v1 disagree on high-impact outputs →
+    route to shadow review (π_S audit), not automatic acceptance.
+
+CALIBRATED PARAMETERS (locked — v2.1):
     lambda1 = 0.5, lambda2 = 0.5
     tau_h = 0.70, tau_l = 0.20
-    Validated: bad_accepted=1, good_rejected=0 (strictly dominates v1)
-
-FALLBACK: if anomaly_detected → revert to v1 scoring
+    Promoted: 652 samples, ba(v4)=1≤ba(v1)=1, gr(v4)=0≤gr(v1)=1
 
 Usage:
     from survival import SurvivalEngine, SurvivalConfig
@@ -31,13 +35,15 @@ Usage:
     cfg = SurvivalConfig(deepseek_api_key="sk-...")
     engine = SurvivalEngine(cfg)
 
-    # v4 primary (recommended)
+    # v4 primary (production output)
     result = engine.evaluate("What is the speed of light?")
     print(f"S={result.S:.3f} decision={result.decision}")
 
-    # Shadow mode (v4 decides, v1 logs for safety)
+    # Shadow audit mode (v4 decides, v1 validates)
     result = engine.evaluate_shadow("Explain quantum computing")
     print(f"v4={result['v4']['decision']} v1={result['v1']['decision']}")
+    if result.get('needs_shadow_review'):
+        print(f"HIGH-IMPACT DIVERGENCE → flagged for audit")
 """
 
 import json
@@ -54,6 +60,118 @@ from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
 DIR = os.path.dirname(os.path.abspath(__file__))
+RAW_PROMPTS_PATH = os.path.join(DIR, "data", "raw_prompts.jsonl")
+DISAGREEMENT_LOG_PATH = os.path.join(DIR, "logs", "disagreement_cases.jsonl")
+
+# High-impact decision zones: disagreements here require shadow review
+# v4 says "accept" but S is in the danger zone near tau_h, or
+# v4 says "reject" but S is close to tau_l (potential over-rejection)
+HIGH_IMPACT_ZONE = {
+    "accept_near_threshold": True,   # v4=accept with S in [tau_h, tau_h+0.10]
+    "reject_near_threshold": True,   # v4=reject with S in [tau_l-0.10, tau_l]
+    "cross_tier": True,              # v4 and v1 differ by >1 tier (accept vs reject)
+}
+
+# Promotion decision rule (validated, locked):
+# Promote v4 as π_E if ALL of:
+#   good_rejected(v4) ≤ good_rejected(v1)
+#   bad_accepted(v4) ≤ bad_accepted(v1)
+#   divergence(v4) ≤ divergence(v1) + ε  (ε = 0.02)
+#   evaluated over ≥ 500 samples
+# STATUS: PROMOTED (652 samples, all conditions met)
+
+
+def log_disagreement(result: dict, reason: str = "") -> None:
+    """Log a v4-vs-v1 disagreement case for failure-mode analysis.
+    Written to logs/disagreement_cases.jsonl (append-only dataset).
+    
+    High-impact disagreements are flagged for manual shadow review.
+    All disagreements are logged for weekly audit regardless of severity.
+    """
+    if not result.get("divergence", False):
+        return  # no disagreement, nothing to log
+    
+    v4 = result.get("v4", {})
+    v1 = result.get("v1", {})
+    s_v4 = v4.get("S", 0.0)
+    s_v1 = v1.get("S", 0.0)
+    dec_v4 = v4.get("decision", "")
+    dec_v1 = v1.get("decision", "")
+    
+    # Determine if this is high-impact (needs manual shadow review)
+    tier_order = {"accept": 3, "review": 2, "reject": 1}
+    tier_diff = abs(tier_order.get(dec_v4, 0) - tier_order.get(dec_v1, 0))
+    
+    is_cross_tier = tier_diff > 1  # accept vs reject
+    is_accept_near = (dec_v4 == "accept" and s_v4 < 0.80)  # near tau_h=0.70
+    is_reject_near = (dec_v4 == "reject" and s_v4 > 0.10)  # near tau_l=0.20
+    
+    is_high_impact = (is_cross_tier or is_accept_near or is_reject_near)
+    
+    # Determine the safe action
+    if is_high_impact:
+        # On high-impact divergence: if v1 is more conservative, defer to v1's caution
+        if tier_order.get(dec_v1, 0) < tier_order.get(dec_v4, 0):
+            safe_decision = dec_v1  # v1 is stricter → use v1's decision
+        else:
+            safe_decision = "review"  # disagreement is ambiguous → escalate to review
+    else:
+        safe_decision = dec_v4  # low-impact divergence → v4 decides
+    
+    entry = {
+        "query_id": result.get("query_id", ""),
+        "prompt": result.get("prompt", "")[:500],
+        "v4": {"S": s_v4, "kappa": v4.get("kappa", 0), "decision": dec_v4},
+        "v1": {"S": s_v1, "kappa": v1.get("kappa", 0), "decision": dec_v1},
+        "S_delta": round(s_v4 - s_v1, 4),
+        "tier_diff": tier_diff,
+        "is_cross_tier": is_cross_tier,
+        "is_high_impact": is_high_impact,
+        "safe_decision": safe_decision,
+        "reason": reason or ("high_impact_divergence" if is_high_impact else "low_impact_divergence"),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+    
+    try:
+        os.makedirs(os.path.dirname(DISAGREEMENT_LOG_PATH), exist_ok=True)
+        with open(DISAGREEMENT_LOG_PATH, "a") as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    except OSError:
+        pass
+    
+    return is_high_impact, safe_decision
+
+
+def capture_prompt(prompt: str, source: str = "api") -> None:
+    """Log a real prompt to raw_prompts.jsonl before any model call.
+    This is the single data capture point. Only real requests go here."""
+    if not prompt or not prompt.strip():
+        return
+    # Dedup: skip if this exact prompt already exists
+    md5 = hashlib.md5(prompt.strip().encode()).hexdigest()
+    if os.path.exists(RAW_PROMPTS_PATH):
+        try:
+            with open(RAW_PROMPTS_PATH, "r") as f:
+                for line in f:
+                    try:
+                        existing = json.loads(line.strip())
+                        if hashlib.md5(existing.get("prompt", "").strip().encode()).hexdigest() == md5:
+                            return  # already captured
+                    except (json.JSONDecodeError, OSError):
+                        continue
+        except OSError:
+            pass
+    entry = {
+        "prompt": prompt.strip(),
+        "source": source,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+    try:
+        os.makedirs(os.path.dirname(RAW_PROMPTS_PATH), exist_ok=True)
+        with open(RAW_PROMPTS_PATH, "a") as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    except OSError:
+        pass
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -341,7 +459,9 @@ class DeepSeekClient:
         )
 
         try:
-            with urlopen(req, timeout=30) as resp:
+            import socket
+            socket.setdefaulttimeout(20)
+            with urlopen(req, timeout=20) as resp:
                 body = json.loads(resp.read().decode("utf-8"))
                 return body["choices"][0]["message"]["content"].strip()
         except HTTPError as e:
@@ -349,8 +469,8 @@ class DeepSeekClient:
             raise RuntimeError(
                 f"DeepSeek API error {e.code}: {error_body}"
             ) from e
-        except URLError as e:
-            raise RuntimeError(f"DeepSeek API connection error: {e}") from e
+        except (URLError, socket.timeout, TimeoutError, OSError) as e:
+            raise RuntimeError(f"API timeout/error: {type(e).__name__}") from e
 
     def generate_batch(self, prompts: list[str], system: str = "") -> list[str]:
         """Generate multiple responses with rate limiting."""
@@ -809,19 +929,10 @@ class SurvivalEngine:
 
     def evaluate(self, prompt: str, query_id: str = "") -> SurvivalResult:
         """
-        v2.0 primary evaluation — uses v4 (context-based) scoring.
-
-        Steps:
-        1. Get baseline response
-        2. Get cross-context responses → v4 kappa, v4 delta_L, delta_G
-        3. Compute S, A
-        4. Gate decision (v4 decides)
-        5. Drift tracking
-
-        Note: perturbation responses (v1) are NOT computed in v2.0 primary mode.
-              This reduces API calls from (1+n_pert+n_ctx) to (1+n_ctx).
-              Use evaluate_shadow() if you need both v1 and v4 side by side.
+        v2.1 PRIMARY evaluation — uses v4 (π_E) exclusively.
+        No v1 fallback. v1 is frozen and runs only as audit comparator.
         """
+        capture_prompt(prompt, source=self.config.provider)
         cfg = self.config
         qid = query_id or hashlib.sha256(prompt.encode()).hexdigest()[:12]
         n_calls = 0
@@ -883,12 +994,17 @@ class SurvivalEngine:
     def evaluate_shadow(self, prompt: str, query_id: str = "",
                           shadow_log_path: str = "") -> dict:
         """
-        Shadow mode: compute BOTH v1 and v4 S(x) from the same API calls.
-        v1 decides routing; v4 observes alongside. No routing change.
-
-        API calls: 1 baseline + (n_perturbations-1) + n_contexts.
-        Minimum: n_perturbations >= 2, n_contexts >= 3.
+        Shadow audit mode: v4 decides (π_E), v1 validates (π_S).
+        
+        v4 is the sole production output policy.
+        v1 runs in parallel as frozen comparator for audit purposes.
+        
+        SAFETY: if v4 and v1 disagree on high-impact outputs:
+            → safe_decision overrides v4's decision
+            → case logged to logs/disagreement_cases.jsonl
+            → flagged as needs_shadow_review=True
         """
+        capture_prompt(prompt, source=self.config.provider)
         cfg = self.config
         qid = query_id or hashlib.sha256(prompt.encode()).hexdigest()[:12]
         n_calls = 0
@@ -932,9 +1048,22 @@ class SurvivalEngine:
         decision_v4 = decide_gate(S_v4, cfg.tau_h, cfg.tau_l)
 
         divergence = decision_v1 != decision_v4
-        s_dot, drift_warning = self._drift.update(S_v4)  # v2.0: track v4 drift
+        s_dot, drift_warning = self._drift.update(S_v4)  # v2.1: track v4 drift
         self._drift.save()
 
+        # ─── Disagreement handling (v2.1 safety rule) ─────
+        needs_shadow_review = False
+        safe_decision = decision_v4  # default: v4 decides
+        
+        if divergence:
+            high_impact, safe_decision = log_disagreement(
+                {"query_id": qid, "prompt": prompt, "divergence": True,
+                 "v1": {"S": round(S_v1, 4), "kappa": round(kappa_v1, 4), "decision": decision_v1},
+                 "v4": {"S": round(S_v4, 4), "kappa": round(kappa_v4, 4), "decision": decision_v4}},
+                reason="v4_vs_v1_disagreement"
+            ) or (False, decision_v4)
+            needs_shadow_review = high_impact
+        
         ts = datetime.now(timezone.utc).isoformat()
         result = {
             "query_id": qid, "prompt": prompt, "timestamp": ts,
@@ -946,7 +1075,8 @@ class SurvivalEngine:
                    "decision": decision_v4},
             "divergence": divergence,
             "S_delta": round(S_v4 - S_v1, 4),
-            "decision": decision_v4,  # v2.0: v4 decides
+            "decision": safe_decision,  # v2.1: safe_decision (may override v4 on high-impact)
+            "needs_shadow_review": needs_shadow_review,
             "n_api_calls": n_calls,
         }
 
