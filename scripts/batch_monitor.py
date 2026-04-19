@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-batch_monitor.py — Streaming rolling-window monitor [v2.1.5]
+batch_monitor.py — Streaming rolling-window monitor [v2.1.6]
 
 Replaces weekly reporting with event-driven monitoring.
 Runs after every batch append. No reports, just signals.
@@ -28,6 +28,12 @@ v2.1.4: persistent cross-run memory + suppression:
   - minimum evidence threshold prevents premature suppression from early noise
   - enables stable, adaptive control across runs
 
+v2.1.6: exploration guard + stat floor:
+  - 10% exploration override: suppressed actions still fire ~1 in 10 times (self-recovering)
+  - stat floor >=1: after decay, counts never drop below 1 (prevents extreme ratios)
+  - exploration events logged with {action, suppressed, exploration_override, rate, total}
+  - system becomes self-recovering, not just self-correcting
+
 Usage:
   python scripts/batch_monitor.py              # scan full log, print alerts
   python scripts/batch_monitor.py --watch      # tail-follow mode (for live use)
@@ -37,6 +43,7 @@ import json
 import os
 import sys
 import time
+import random
 from datetime import datetime, timezone
 from collections import deque
 
@@ -49,6 +56,8 @@ SUPPRESSION_LOG_PATH = os.path.join(BASE, "logs", "monitor_suppressions.jsonl")
 SUPPRESSION_THRESHOLD = 0.5  # suppress if ineffective_rate > 50%
 MIN_EVIDENCE = 5              # minimum total evaluations before suppression kicks in
 DECAY_FACTOR = 0.9            # multiplicative decay on load (recent > old)
+STAT_FLOOR = 1                # minimum count after decay (prevents extreme ratios)
+EXPLORATION_RATE = 0.1        # 10% chance to fire even when suppressed (self-recovery)
 
 WINDOW_50 = 50
 WINDOW_200 = 200
@@ -77,6 +86,7 @@ class MonitorState:
     v2.1.3: tracks per-action effectiveness (pre/post metrics + expiry evaluation).
     v2.1.4: persistent cross-run memory + suppression.
     v2.1.5: minimum evidence threshold (>=5) + 0.9 decay on load + enriched suppression log.
+    v2.1.6: exploration guard (10% override) + stat floor (>=1) + exploration logging.
 
     Usage in batch runner:
       monitor = MonitorState()
@@ -141,6 +151,7 @@ class MonitorState:
                         data[action_name][key] = 0
 
             # v2.1.5: apply decay — recent performance > old history
+            # v2.1.6: enforce stat floor — counts never drop below STAT_FLOOR
             # Simple multiplicative decay, no timestamps needed
             for action_name in data:
                 old_eff = data[action_name]["effective"]
@@ -148,6 +159,10 @@ class MonitorState:
                 if old_eff > 0 or old_ineff > 0:
                     data[action_name]["effective"] = max(0, int(round(old_eff * DECAY_FACTOR)))
                     data[action_name]["ineffective"] = max(0, int(round(old_ineff * DECAY_FACTOR)))
+                    # v2.1.6: stat floor — prevent extreme ratios from tiny counts
+                    if old_eff > 0 or old_ineff > 0:
+                        data[action_name]["effective"] = max(data[action_name]["effective"], STAT_FLOOR)
+                        data[action_name]["ineffective"] = max(data[action_name]["ineffective"], STAT_FLOOR)
 
             return data
         except (json.JSONDecodeError, OSError):
@@ -195,6 +210,7 @@ class MonitorState:
         entry = {
             "action": action_name,
             "suppressed": True,
+            "exploration_override": False,
             "rate": rate,
             "total": total,
             "reason": reason,
@@ -205,6 +221,39 @@ class MonitorState:
         ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
         print(f"  [{ts}] [SUPPRESSED] {action_name}: {reason} "
               f"(ineffective_rate={rate:.0%}, total={total}, {eff}e/{ineff}i)")
+        try:
+            os.makedirs(os.path.dirname(SUPPRESSION_LOG_PATH), exist_ok=True)
+            with open(SUPPRESSION_LOG_PATH, "a") as f:
+                f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        except OSError:
+            pass
+
+    def _log_exploration(self, action_name: str):
+        """Log an exploration override event — suppressed action fires anyway.
+
+        v2.1.6: exploration guard ensures suppressed actions can recover
+        if conditions change. ~10% of the time, a suppressed action still activates.
+        """
+        s = self._stats.get(action_name, {})
+        eff = s.get("effective", 0)
+        ineff = s.get("ineffective", 0)
+        total = eff + ineff
+        rate = round(ineff / total, 2) if total > 0 else 0.0
+
+        entry = {
+            "action": action_name,
+            "suppressed": True,
+            "exploration_override": True,
+            "rate": rate,
+            "total": total,
+            "reason": f"exploration override ({EXPLORATION_RATE:.0%} chance)",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+        self._suppressed_events.append(entry)
+
+        ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
+        print(f"  [{ts}] [EXPLORATION] {action_name}: firing despite suppression "
+              f"(ineffective_rate={rate:.0%}, total={total}, {eff}e/{ineff}i) — testing recovery")
         try:
             os.makedirs(os.path.dirname(SUPPRESSION_LOG_PATH), exist_ok=True)
             with open(SUPPRESSION_LOG_PATH, "a") as f:
@@ -277,8 +326,20 @@ class MonitorState:
         if has_spike and "forced_review" not in self._active:
             # v2.1.4: check suppression before activating
             if self._is_suppressed("forced_review"):
-                self._log_suppression("forced_review",
-                    "historical ineffective_rate > 50%")
+                # v2.1.6: exploration guard — 10% chance to fire anyway
+                if random.random() < EXPLORATION_RATE:
+                    self._log_exploration("forced_review")
+                    self._active["forced_review"] = ACTION_EXPIRY
+                    self._tracking["forced_review"] = {
+                        "pre_false_accept": pre_false_accept,
+                        "pre_risk_spike": pre_risk_spike,
+                        "false_accept": 0,
+                        "risk_spike": 0,
+                        "samples": 0,
+                    }
+                else:
+                    self._log_suppression("forced_review",
+                        "historical ineffective_rate > 50%")
             else:
                 self._active["forced_review"] = ACTION_EXPIRY
                 self._tracking["forced_review"] = {
@@ -292,8 +353,23 @@ class MonitorState:
         if has_fa and "tightened_threshold" not in self._active:
             # v2.1.4: check suppression before activating
             if self._is_suppressed("tightened_threshold"):
-                self._log_suppression("tightened_threshold",
-                    "historical ineffective_rate > 50%")
+                # v2.1.6: exploration guard — 10% chance to fire anyway
+                if random.random() < EXPLORATION_RATE:
+                    self._log_exploration("tightened_threshold")
+                    if "forced_review" in self._active:
+                        self._active["tightened_threshold"] = self._active["forced_review"] + ACTION_EXPIRY
+                    else:
+                        self._active["tightened_threshold"] = ACTION_EXPIRY
+                    self._tracking["tightened_threshold"] = {
+                        "pre_false_accept": pre_false_accept,
+                        "pre_risk_spike": pre_risk_spike,
+                        "false_accept": 0,
+                        "risk_spike": 0,
+                        "samples": 0,
+                    }
+                else:
+                    self._log_suppression("tightened_threshold",
+                        "historical ineffective_rate > 50%")
             else:
                 if "forced_review" in self._active:
                     self._active["tightened_threshold"] = self._active["forced_review"] + ACTION_EXPIRY
