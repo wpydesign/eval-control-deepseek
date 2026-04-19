@@ -39,7 +39,7 @@ BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL_PATH = os.path.join(BASE, "model", "failure_predictor.pkl")
 DATASET_PATH = os.path.join(BASE, "logs", "failure_dataset.jsonl")
 
-# Risk thresholds (configurable)
+# Risk thresholds (fallback defaults — overridden by model's optimized thresholds)
 RISK_REVIEW_THRESHOLD = 0.2    # above this → shadow review
 RISK_ESCALATE_THRESHOLD = 0.4  # above this → force escalate
 
@@ -59,6 +59,8 @@ class FailurePredictor:
         self._model = None
         self._features = None
         self._metadata = None
+        self._review_threshold = RISK_REVIEW_THRESHOLD
+        self._escalate_threshold = RISK_ESCALATE_THRESHOLD
         self._loaded = False
         self._load()
 
@@ -91,9 +93,15 @@ class FailurePredictor:
             }
             self._loaded = True
 
+            # v2.2.1: use optimized thresholds from model (fallback to defaults)
+            thresholds = package.get("thresholds", {})
+            self._review_threshold = thresholds.get("review_threshold", RISK_REVIEW_THRESHOLD)
+            self._escalate_threshold = thresholds.get("escalate_threshold", RISK_ESCALATE_THRESHOLD)
+
             n = self._metadata["n_samples"]
             auc = self._metadata["metrics"].get("auc", "N/A")
             print(f"  [PREDICTOR] Loaded model (trained on {n} samples, AUC={auc})")
+            print(f"  [PREDICTOR] Thresholds: review>{self._review_threshold}, escalate>{self._escalate_threshold} (cost-optimized)")
             return True
         except Exception as e:
             print(f"  [PREDICTOR] Failed to load model: {e}")
@@ -134,10 +142,10 @@ class FailurePredictor:
             prob = self._model.predict_proba(X)[0][1]  # P(class=1) = P(is_wrong)
             risk_score = float(round(prob, 4))
 
-            # Determine action based on risk thresholds
-            if risk_score >= RISK_ESCALATE_THRESHOLD:
+            # Determine action based on risk thresholds (model-optimized)
+            if risk_score >= self._escalate_threshold:
                 action = "escalate"
-            elif risk_score >= RISK_REVIEW_THRESHOLD:
+            elif risk_score >= self._review_threshold:
                 action = "shadow_review"
             else:
                 action = "none"
@@ -210,7 +218,9 @@ class FailurePredictor:
         print(f"  [PREDICTOR] Status: LOADED")
         print(f"  [PREDICTOR] Trained: {trained} on {n} samples")
         print(f"  [PREDICTOR] AUC={auc}, Accuracy={acc}")
-        print(f"  [PREDICTOR] Thresholds: review>{RISK_REVIEW_THRESHOLD}, escalate>{RISK_ESCALATE_THRESHOLD}")
+        print(f"  [PREDICTOR] Thresholds: review>{self._review_threshold}, escalate>{self._escalate_threshold} (cost-optimized)")
+        if self._metadata.get("coefficients"):
+            print(f"  [PREDICTOR] Calibration: {self._metadata.get('calibration_method', 'unknown')}")
 
 
 def main():

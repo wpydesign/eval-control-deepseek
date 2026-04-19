@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-train_failure_predictor.py — Train logistic regression to predict P(is_wrong | signals) [v2.2.0]
+train_failure_predictor.py — Train + calibrate + optimize failure predictor [v2.2.1]
 
 Reads logs/failure_dataset.jsonl, trains on labeled samples, saves model + schema.
 
@@ -9,7 +9,15 @@ Features (6 numeric):
 
 Model:
   LogisticRegression(class_weight='balanced', max_iter=1000)
+  + CalibratedClassifierCV(isotonic) for probability calibration
   Outputs calibrated P(is_wrong) ∈ [0, 1]
+
+Threshold optimization:
+  Cost-based: minimizes expected cost given:
+    C(false_accept) = 5.0  — letting a wrong answer through
+    C(false_reject) = 1.0  — blocking a correct answer
+    C(escalation)   = 0.5  — cost of human review per escalation
+  Finds optimal review/escalate thresholds via grid search.
 
 Outputs:
   model/failure_predictor.pkl   — trained model + feature list + metadata
@@ -27,8 +35,9 @@ import pickle
 import numpy as np
 from datetime import datetime, timezone
 from sklearn.linear_model import LogisticRegression
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.metrics import classification_report, roc_auc_score, confusion_matrix, brier_score_loss
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_score, cross_val_predict
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATASET_PATH = os.path.join(BASE, "logs", "failure_dataset.jsonl")
@@ -39,6 +48,12 @@ REPORT_PATH = os.path.join(MODEL_DIR, "training_report.json")
 NUMERIC_FEATURES = [
     "S_v4", "S_v1", "confidence_gap", "kappa_v4", "delta_G_v4", "delta_L_v4"
 ]
+
+# Cost matrix for threshold optimization
+# These represent relative costs of different decision outcomes
+FALSE_ACCEPT_COST = 5.0   # letting a wrong answer through (highest cost)
+FALSE_REJECT_COST = 1.0   # blocking a correct answer (nuisance, not catastrophic)
+ESCALATION_COST = 0.5      # cost per escalation (human review time)
 
 
 def load_dataset():
@@ -81,16 +96,21 @@ def extract_X_y(samples):
 
 
 def train(X, y):
-    """Train logistic regression with balanced class weights."""
-    model = LogisticRegression(
+    """Train logistic regression + isotonic calibration."""
+    base_model = LogisticRegression(
         class_weight="balanced",
         max_iter=1000,
         solver="lbfgs",
         C=1.0,
         random_state=42,
     )
-    model.fit(X, y)
-    return model
+    # Isotonic calibration: non-parametric, fits P(y|X) more accurately
+    calibrated = CalibratedClassifierCV(base_model, method="isotonic", cv="prefit")
+    # Split: fit base on all, calibrate via cross-val to avoid overfitting
+    # Use 3-fold cross-validation for calibration fitting
+    calibrated = CalibratedClassifierCV(base_model, method="isotonic", cv=3)
+    calibrated.fit(X, y)
+    return calibrated
 
 
 def evaluate(model, X, y):
@@ -128,6 +148,75 @@ def evaluate(model, X, y):
     }
 
 
+def optimize_thresholds(y_true, y_prob):
+    """Find cost-optimal review and escalate thresholds via grid search.
+
+    Decision framework:
+      risk_score < review_threshold    → accept (no intervention)
+      review_threshold <= risk < escalate → shadow_review (flag for attention)
+      risk_score >= escalate_threshold  → escalate (force review / block)
+
+    Cost model per sample:
+      - If actually wrong (y=1):
+          accept it     → FALSE_ACCEPT_COST (5.0)
+          shadow_review → ESCALATION_COST (0.5, caught some)
+          escalate      → ESCALATION_COST (0.5, caught most)
+      - If actually correct (y=0):
+          accept it     → 0 (correct decision)
+          shadow_review → ESCALATION_COST * 0.3 (minor nuisance)
+          escalate      → FALSE_REJECT_COST (1.0, unnecessary block)
+    """
+    n = len(y_true)
+    best_cost = float('inf')
+    best_review = 0.2
+    best_escalate = 0.4
+
+    # Grid search over threshold pairs
+    for review_t in np.arange(0.05, 0.60, 0.05):
+        for escalate_t in np.arange(review_t + 0.05, 1.0, 0.05):
+            total_cost = 0.0
+            for i in range(n):
+                p = y_prob[i]
+                actual_wrong = y_true[i]
+
+                if p < review_t:
+                    action = "accept"
+                elif p < escalate_t:
+                    action = "shadow_review"
+                else:
+                    action = "escalate"
+
+                if actual_wrong == 1:
+                    if action == "accept":
+                        total_cost += FALSE_ACCEPT_COST * p  # weighted by confidence
+                    elif action == "shadow_review":
+                        total_cost += ESCALATION_COST
+                    else:  # escalate
+                        total_cost += ESCALATION_COST * 0.5  # caught, lower residual risk
+                else:  # actual correct
+                    if action == "accept":
+                        total_cost += 0
+                    elif action == "shadow_review":
+                        total_cost += ESCALATION_COST * 0.3
+                    else:  # escalate
+                        total_cost += FALSE_REJECT_COST
+
+            if total_cost < best_cost:
+                best_cost = total_cost
+                best_review = review_t
+                best_escalate = escalate_t
+
+    return {
+        "review_threshold": round(float(best_review), 2),
+        "escalate_threshold": round(float(best_escalate), 2),
+        "total_cost": round(float(best_cost), 2),
+        "cost_per_sample": round(float(best_cost / n), 4),
+        "false_accept_cost": FALSE_ACCEPT_COST,
+        "false_reject_cost": FALSE_REJECT_COST,
+        "escalation_cost": ESCALATION_COST,
+    }
+
+
 def main():
     force = "--retrain" in sys.argv
 
@@ -155,10 +244,20 @@ def main():
     print("Evaluating...")
     metrics = evaluate(model, X, y)
 
-    # Feature coefficients (model insight)
+    print("\nOptimizing decision thresholds (cost-based)...")
+    y_prob_all = model.predict_proba(X)[:, 1]
+    thresholds = optimize_thresholds(y, y_prob_all)
+    print(f"  Optimal review threshold:   {thresholds['review_threshold']}")
+    print(f"  Optimal escalate threshold: {thresholds['escalate_threshold']}")
+    print(f"  Expected cost per sample:   {thresholds['cost_per_sample']:.4f}")
+    print(f"  Cost model: FA={FALSE_ACCEPT_COST}, FR={FALSE_REJECT_COST}, Esc={ESCALATION_COST}")
+
+    # Feature coefficients (from base model)
     coef_dict = {}
-    for fname, coef in zip(NUMERIC_FEATURES, model.coef_[0]):
-        coef_dict[fname] = round(float(coef), 6)
+    base_model = model.estimator if hasattr(model, "estimator") else model
+    if hasattr(base_model, "coef_"):
+        for fname, coef in zip(NUMERIC_FEATURES, base_model.coef_[0]):
+            coef_dict[fname] = round(float(coef), 6)
 
     # Print results
     print(f"\n  Accuracy:    {metrics['accuracy']:.2%}")
@@ -188,6 +287,7 @@ def main():
         "n_samples": len(y),
         "metrics": metrics,
         "coefficients": coef_dict,
+        "thresholds": thresholds,
     }
     with open(MODEL_PATH, "wb") as f:
         pickle.dump(model_package, f)
@@ -201,7 +301,9 @@ def main():
         "features": NUMERIC_FEATURES,
         "metrics": metrics,
         "coefficients": coef_dict,
-        "intercept": round(float(model.intercept_[0]), 6),
+        "intercept": round(float(base_model.intercept_[0]), 6) if hasattr(base_model, "intercept_") and base_model.intercept_ is not None else None,
+        "thresholds": thresholds,
+        "calibration_method": "isotonic",
     }
     with open(REPORT_PATH, "w") as f:
         json.dump(report, f, indent=2, ensure_ascii=False)
