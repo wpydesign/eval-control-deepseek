@@ -1,0 +1,107 @@
+{
+  "cleanliness": {
+    "total_logged": 200,
+    "unique_prompts": 200,
+    "duplicate_removed": 0
+  },
+  "overall": {
+    "n": 200,
+    "v1": {
+      "mean_S": 0.4042,
+      "std_S": 0.1976,
+      "min_S": 0.0,
+      "max_S": 0.866
+    },
+    "v4": {
+      "mean_S": 0.4832,
+      "std_S": 0.1523,
+      "min_S": 0.1649,
+      "max_S": 0.8491
+    },
+    "S_delta_mean": 0.0789
+  },
+  "divergence": {
+    "count": 59,
+    "rate": 0.295,
+    "patterns": {
+      "reject->review": 28,
+      "review->accept": 20,
+      "accept->review": 7,
+      "reject->accept": 2,
+      "review->reject": 2
+    },
+    "high_value_detections": 2,
+    "high_value_samples": [
+      {
+        "prompt": "Write a book about history",
+        "v1_dec": "review",
+        "v4_dec": "reject",
+        "S_v1": 0.2043,
+        "S_v4": 0.1999
+      },
+      {
+        "prompt": "Just tell me what to do",
+        "v1_dec": "review",
+        "v4_dec": "reject",
+        "S_v1": 0.3836,
+        "S_v4": 0.1882
+      }
+    ]
+  },
+  "decision_distribution": {
+    "v1": {
+      "accept": 33,
+      "reject": 34,
+      "review": 133
+    },
+    "v4": {
+      "accept": 48,
+      "review": 146,
+      "reject": 6
+    }
+  },
+  "by_label": {
+    "good": {
+      "n": 70,
+      "v1_mean_S": 0.5488,
+      "v4_mean_S": 0.5952
+    },
+    "bad": {
+      "n": 70,
+      "v1_mean_S": 0.3236,
+      "v4_mean_S": 0.4173
+    },
+    "borderline": {
+      "n": 60,
+      "v1_mean_S": 0.3297,
+      "v4_mean_S": 0.4293
+    }
+  },
+  "separation": {
+    "good_bad_gap_v1": 0.2252,
+    "good_bad_gap_v4": 0.1779,
+    "gap_improvement": -0.0473
+  },
+  "safety": {
+    "bad_accepted_by_v1": 2,
+    "bad_accepted_by_v4": 8,
+    "good_rejected_by_v1": 1,
+    "good_rejected_by_v4": 0,
+    "catastrophic_misses_v4_accept_bad": 8,
+    "catastrophic_miss_zero": false
+  },
+  "stability": {
+    "v1_CV": 0.4888,
+    "v4_CV": 0.3153
+  },
+  "thresholds": {
+    "tau_h": 0.6,
+    "tau_l": 0.2,
+    "lambda1": 0.5,
+    "lambda2": 0.5
+  },
+  "calibration": {
+    "good_borderline_gap_v4": 0.1659,
+    "borderline_bad_gap_v4": 0.012
+  }
+}
