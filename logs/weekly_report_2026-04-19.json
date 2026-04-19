@@ -1,0 +1,810 @@
+{
+  "report_date": "2026-04-19T21:31:56.721739+00:00",
+  "report_type": "weekly_stability_report",
+  "version": "v2.1",
+  "pipeline_status": "v4 = π_E (primary), v1 = π_S (audit)",
+  "overview": {
+    "total_evaluations": 1072,
+    "total_disagreements": 136,
+    "overall_disagreement_rate": 0.1269,
+    "high_impact_total": 15,
+    "drift_alerts": [],
+    "stability_verdict": "STABLE"
+  },
+  "disagreement_rate_trend": [
+    {
+      "chunk": 1,
+      "evaluations": 100,
+      "disagreements": 21,
+      "rate": 0.21,
+      "date_from": "2026-04-19",
+      "date_to": "2026-04-19"
+    },
+    {
+      "chunk": 2,
+      "evaluations": 100,
+      "disagreements": 25,
+      "rate": 0.25,
+      "date_from": "2026-04-19",
+      "date_to": "2026-04-19"
+    },
+    {
+      "chunk": 3,
+      "evaluations": 100,
+      "disagreements": 10,
+      "rate": 0.1,
+      "date_from": "2026-04-19",
+      "date_to": "2026-04-19"
+    },
+    {
+      "chunk": 4,
+      "evaluations": 100,
+      "disagreements": 43,
+      "rate": 0.43,
+      "date_from": "2026-04-19",
+      "date_to": "2026-04-19"
+    },
+    {
+      "chunk": 5,
+      "evaluations": 100,
+      "disagreements": 43,
+      "rate": 0.43,
+      "date_from": "2026-04-19",
+      "date_to": "2026-04-19"
+    },
+    {
+      "chunk": 6,
+      "evaluations": 100,
+      "disagreements": 30,
+      "rate": 0.3,
+      "date_from": "2026-04-19",
+      "date_to": "2026-04-19"
+    },
+    {
+      "chunk": 7,
+      "evaluations": 100,
+      "disagreements": 12,
+      "rate": 0.12,
+      "date_from": "2026-04-19",
+      "date_to": "2026-04-19"
+    },
+    {
+      "chunk": 8,
+      "evaluations": 100,
+      "disagreements": 11,
+      "rate": 0.11,
+      "date_from": "2026-04-19",
+      "date_to": "2026-04-19"
+    },
+    {
+      "chunk": 9,
+      "evaluations": 100,
+      "disagreements": 9,
+      "rate": 0.09,
+      "date_from": "2026-04-19",
+      "date_to": "2026-04-19"
+    },
+    {
+      "chunk": 10,
+      "evaluations": 100,
+      "disagreements": 12,
+      "rate": 0.12,
+      "date_from": "2026-04-19",
+      "date_to": "2026-04-19"
+    },
+    {
+      "chunk": 11,
+      "evaluations": 72,
+      "disagreements": 4,
+      "rate": 0.0556,
+      "date_from": "2026-04-19",
+      "date_to": "2026-04-19"
+    }
+  ],
+  "high_impact_trend": [
+    {
+      "date": "2026-04-19",
+      "total_disagreements": 136,
+      "high_impact": 15,
+      "hi_rate": 0.1103
+    }
+  ],
+  "v4_vs_ps_gap_trend": [
+    {
+      "date": "2026-04-19",
+      "count": 136,
+      "mean_S_delta": 0.1501,
+      "mean_abs_S_delta": 0.1718,
+      "v4_more_lenient_pct": 89.7
+    }
+  ],
+  "safety_rule_effectiveness": {
+    "total_disagreements": 136,
+    "high_impact_total": 15,
+    "high_impact_rate": 11.0,
+    "safety_rule": {
+      "escalated_to_review": 15,
+      "still_accepted": 0,
+      "escalation_rate": 100.0
+    },
+    "low_impact": {
+      "total": 121,
+      "escalated": 120,
+      "passed_through": 1,
+      "unnecessary_escalation_rate": 99.2
+    },
+    "net_safety": "EFFECTIVE"
+  },
+  "metrics_history": [
+    {
+      "timestamp": "2026-04-19T09:05:37.162691+00:00",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0.23,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "2026-04-19T09:20:48.628812+00:00",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0.1429,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "2026-04-19T16:56:49.173114+00:00",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0.0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "2026-04-19T16:59:14.838132+00:00",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0.0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "2026-04-19T17:02:01.823618+00:00",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0.0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "2026-04-19T17:04:07.501707+00:00",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0.0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "",
+      "total": 0,
+      "bad_accepted_v4": 0,
+      "bad_accepted_v1": 0,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 0,
+      "divergence_rate": 0,
+      "high_impact_cases": 0,
+      "action": ""
+    },
+    {
+      "timestamp": "2026-04-19T18:25:17.301501+00:00",
+      "total": 583,
+      "bad_accepted_v4": 1,
+      "bad_accepted_v1": 1,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 1,
+      "divergence_rate": 0.1715,
+      "high_impact_cases": 0,
+      "action": "keep running"
+    },
+    {
+      "timestamp": "2026-04-19T19:37:52.316073+00:00",
+      "total": 606,
+      "bad_accepted_v4": 1,
+      "bad_accepted_v1": 1,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 1,
+      "divergence_rate": 0.17,
+      "high_impact_cases": 0,
+      "action": "keep running"
+    },
+    {
+      "timestamp": "2026-04-19T19:49:38.334463+00:00",
+      "total": 652,
+      "bad_accepted_v4": 1,
+      "bad_accepted_v1": 1,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 1,
+      "divergence_rate": 0.1641,
+      "high_impact_cases": 0,
+      "action": "keep running"
+    },
+    {
+      "timestamp": "2026-04-19T19:54:46.922050+00:00",
+      "total": 675,
+      "bad_accepted_v4": 1,
+      "bad_accepted_v1": 1,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 1,
+      "divergence_rate": 0.1644,
+      "high_impact_cases": 0,
+      "action": "keep running"
+    },
+    {
+      "timestamp": "2026-04-19T20:12:36.711320+00:00",
+      "total": 835,
+      "bad_accepted_v4": 1,
+      "bad_accepted_v1": 1,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 1,
+      "divergence_rate": 0.1533,
+      "high_impact_cases": 0,
+      "action": "keep running"
+    },
+    {
+      "timestamp": "2026-04-19T20:25:47.855154+00:00",
+      "total": 979,
+      "bad_accepted_v4": 1,
+      "bad_accepted_v1": 1,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 1,
+      "divergence_rate": 0.1481,
+      "high_impact_cases": 0,
+      "action": "keep running"
+    },
+    {
+      "timestamp": "2026-04-19T20:28:04.218235+00:00",
+      "total": 1013,
+      "bad_accepted_v4": 1,
+      "bad_accepted_v1": 1,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 1,
+      "divergence_rate": 0.1451,
+      "high_impact_cases": 0,
+      "action": "keep running"
+    },
+    {
+      "timestamp": "2026-04-19T21:26:31.564233+00:00",
+      "total": 1072,
+      "bad_accepted_v4": 1,
+      "bad_accepted_v1": 1,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 1,
+      "divergence_rate": 0.139,
+      "high_impact_cases": 0,
+      "action": "v4 STABLE as π_E — v1 remains π_S (audit only)"
+    },
+    {
+      "timestamp": "2026-04-19T21:26:42.112218+00:00",
+      "total": 1072,
+      "bad_accepted_v4": 1,
+      "bad_accepted_v1": 1,
+      "good_rejected_v4": 0,
+      "good_rejected_v1": 1,
+      "divergence_rate": 0.139,
+      "high_impact_cases": 17,
+      "action": "v4 STABLE as π_E — v1 remains π_S (audit only)"
+    }
+  ],
+  "week_over_week": {
+    "disagreement_rate": {
+      "latest": 0.0556,
+      "previous": 0.12,
+      "change": -0.0644
+    },
+    "high_impact_rate": {
+      "latest": 0.1103,
+      "previous": null,
+      "change": null
+    },
+    "mean_gap": {
+      "latest": 0.1718,
+      "previous": null,
+      "change": null
+    }
+  },
+  "failure_mode_summary": {
+    "dominant_mode": "underspecified_tech",
+    "v4_bias": "v4 systematically MORE lenient than v1"
+  }
+}

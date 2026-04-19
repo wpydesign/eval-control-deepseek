@@ -1,0 +1,333 @@
+{
+  "generated_at": "2026-04-19T21:31:54.607461+00:00",
+  "total_cases": 136,
+  "unique_prompts": 136,
+  "high_impact_total": 15,
+  "cross_tier_total": 0,
+  "summary": {
+    "dominant_mode": "underspecified_tech",
+    "most_dangerous_mode": "domain_knowledge",
+    "v4_systematic_bias": "v4 systematically MORE lenient than v1"
+  },
+  "cluster_breakdown": {
+    "underspecified_tech": {
+      "count": 57,
+      "high_impact_count": 2,
+      "high_impact_pct": 3.5,
+      "cross_tier_count": 0,
+      "v4_more_lenient": 54,
+      "v1_more_lenient": 3,
+      "S_v4_mean": 0.3294,
+      "S_v4_std": 0.109,
+      "S_v1_mean": 0.1709,
+      "S_delta_mean": 0.1585,
+      "decision_pairs": {
+        "review_vs_reject": 53,
+        "reject_vs_review": 2,
+        "accept_vs_review": 1,
+        "review_vs_accept": 1
+      },
+      "safe_decisions": {
+        "review": 56,
+        "accept": 1
+      },
+      "sample_prompts": [
+        "What's the best way to learn a new language?",
+        "Why is my program slow?",
+        "Tell me about stuff"
+      ]
+    },
+    "opinion_debate": {
+      "count": 23,
+      "high_impact_count": 1,
+      "high_impact_pct": 4.3,
+      "cross_tier_count": 0,
+      "v4_more_lenient": 23,
+      "v1_more_lenient": 0,
+      "S_v4_mean": 0.3247,
+      "S_v4_std": 0.1088,
+      "S_v1_mean": 0.1522,
+      "S_delta_mean": 0.1724,
+      "decision_pairs": {
+        "review_vs_reject": 22,
+        "accept_vs_review": 1
+      },
+      "safe_decisions": {
+        "review": 23
+      },
+      "sample_prompts": [
+        "What framework should I use for my new project?",
+        "What laptop should I buy for programming?",
+        "Is SQL a programming language?"
+      ]
+    },
+    "confused_user": {
+      "count": 13,
+      "high_impact_count": 0,
+      "high_impact_pct": 0.0,
+      "cross_tier_count": 0,
+      "v4_more_lenient": 13,
+      "v1_more_lenient": 0,
+      "S_v4_mean": 0.3302,
+      "S_v4_std": 0.0587,
+      "S_v1_mean": 0.1591,
+      "S_delta_mean": 0.1711,
+      "decision_pairs": {
+        "review_vs_reject": 13
+      },
+      "safe_decisions": {
+        "review": 13
+      },
+      "sample_prompts": [
+        "What's a password manager? My son says I need one but I don't understand why I c",
+        "What is 2-factor authentication? The bank says I should turn it on but I'm not s",
+        "My phone is doing something weird."
+      ]
+    },
+    "vague_ambiguous": {
+      "count": 11,
+      "high_impact_count": 2,
+      "high_impact_pct": 18.2,
+      "cross_tier_count": 0,
+      "v4_more_lenient": 9,
+      "v1_more_lenient": 2,
+      "S_v4_mean": 0.3242,
+      "S_v4_std": 0.1164,
+      "S_v1_mean": 0.1483,
+      "S_delta_mean": 0.1759,
+      "decision_pairs": {
+        "review_vs_reject": 9,
+        "reject_vs_review": 2
+      },
+      "safe_decisions": {
+        "review": 11
+      },
+      "sample_prompts": [
+        "Can you improve this algorithm?",
+        "Can you optimize this for me?",
+        "Can you explain more?"
+      ]
+    },
+    "domain_knowledge": {
+      "count": 11,
+      "high_impact_count": 6,
+      "high_impact_pct": 54.5,
+      "cross_tier_count": 0,
+      "v4_more_lenient": 7,
+      "v1_more_lenient": 4,
+      "S_v4_mean": 0.6766,
+      "S_v4_std": 0.0467,
+      "S_v1_mean": 0.6144,
+      "S_delta_mean": 0.0622,
+      "decision_pairs": {
+        "accept_vs_review": 6,
+        "review_vs_accept": 4,
+        "review_vs_reject": 1
+      },
+      "safe_decisions": {
+        "review": 11
+      },
+      "sample_prompts": [
+        "If I invest $1000 at 5% annual interest compounded monthly, what's the value aft",
+        "What causes tides in the ocean?",
+        "What does the 'this' keyword refer to in JavaScript arrow functions?"
+      ]
+    },
+    "debug_underspecified": {
+      "count": 9,
+      "high_impact_count": 2,
+      "high_impact_pct": 22.2,
+      "cross_tier_count": 0,
+      "v4_more_lenient": 7,
+      "v1_more_lenient": 2,
+      "S_v4_mean": 0.3094,
+      "S_v4_std": 0.093,
+      "S_v1_mean": 0.1329,
+      "S_delta_mean": 0.1765,
+      "decision_pairs": {
+        "review_vs_reject": 7,
+        "reject_vs_review": 2
+      },
+      "safe_decisions": {
+        "review": 9
+      },
+      "sample_prompts": [
+        "I'm getting a 500 error, what's the problem?",
+        "Show me how it works",
+        "Help, it's broken"
+      ]
+    },
+    "scope_overreach": {
+      "count": 5,
+      "high_impact_count": 1,
+      "high_impact_pct": 20.0,
+      "cross_tier_count": 0,
+      "v4_more_lenient": 4,
+      "v1_more_lenient": 1,
+      "S_v4_mean": 0.2375,
+      "S_v4_std": 0.0419,
+      "S_v1_mean": 0.1393,
+      "S_delta_mean": 0.0982,
+      "decision_pairs": {
+        "review_vs_reject": 4,
+        "reject_vs_review": 1
+      },
+      "safe_decisions": {
+        "review": 5
+      },
+      "sample_prompts": [
+        "What do I need to know about law?",
+        "Write a book about history",
+        "Tell me everything important"
+      ]
+    },
+    "trick_question": {
+      "count": 4,
+      "high_impact_count": 1,
+      "high_impact_pct": 25.0,
+      "cross_tier_count": 0,
+      "v4_more_lenient": 2,
+      "v1_more_lenient": 2,
+      "S_v4_mean": 0.5675,
+      "S_v4_std": 0.1563,
+      "S_v1_mean": 0.5255,
+      "S_delta_mean": 0.042,
+      "decision_pairs": {
+        "review_vs_accept": 2,
+        "accept_vs_review": 1,
+        "review_vs_reject": 1
+      },
+      "safe_decisions": {
+        "review": 4
+      },
+      "sample_prompts": [
+        "Colorless green ideas sleep furiously in what syntactic sense?",
+        "How many words can a word-word word if a word could word words?",
+        "If a plane crashes on the border of two countries, where do you bury the survivo"
+      ]
+    },
+    "impossible_request": {
+      "count": 3,
+      "high_impact_count": 0,
+      "high_impact_pct": 0.0,
+      "cross_tier_count": 0,
+      "v4_more_lenient": 3,
+      "v1_more_lenient": 0,
+      "S_v4_mean": 0.2745,
+      "S_v4_std": 0.071,
+      "S_v1_mean": 0.1655,
+      "S_delta_mean": 0.1091,
+      "decision_pairs": {
+        "review_vs_reject": 3
+      },
+      "safe_decisions": {
+        "review": 3
+      },
+      "sample_prompts": [
+        "Design a system that scales infinitely with zero latency",
+        "Write a complete guide to life",
+        "Teach me everything about medicine"
+      ]
+    }
+  },
+  "high_impact_analysis": {
+    "total_high_impact": 15,
+    "false_accept_risk": {
+      "count": 8,
+      "description": "v4=accept near threshold, v1=review (v1 more conservative)",
+      "cases": [
+        {
+          "prompt": "What causes tides in the ocean?",
+          "S_v4": 0.7011,
+          "S_v1": 0.5759,
+          "safe_decision": "review"
+        },
+        {
+          "prompt": "Colorless green ideas sleep furiously in what syntactic sense?",
+          "S_v4": 0.7215,
+          "S_v1": 0.5789,
+          "safe_decision": "review"
+        },
+        {
+          "prompt": "Is machine learning the same as AI?",
+          "S_v4": 0.7322,
+          "S_v1": 0.647,
+          "safe_decision": "review"
+        },
+        {
+          "prompt": "What is 15% of 240?",
+          "S_v4": 0.7212,
+          "S_v1": 0.6356,
+          "safe_decision": "review"
+        },
+        {
+          "prompt": "Is SQL a programming language?",
+          "S_v4": 0.7257,
+          "S_v1": 0.5716,
+          "safe_decision": "review"
+        }
+      ]
+    },
+    "over_rejection_risk": {
+      "count": 7,
+      "description": "v4=reject, v1=review (v4 more conservative)",
+      "cases": [
+        {
+          "prompt": "Write a book about history",
+          "S_v4": 0.1999,
+          "S_v1": 0.2043,
+          "safe_decision": "review"
+        },
+        {
+          "prompt": "Just tell me what to do",
+          "S_v4": 0.1882,
+          "S_v1": 0.3836,
+          "safe_decision": "review"
+        },
+        {
+          "prompt": "I have a race condition in my Node.js app. Two requests try to update the same row simultaneously. W",
+          "S_v4": 0.1847,
+          "S_v1": 0.2626,
+          "safe_decision": "review"
+        },
+        {
+          "prompt": "Explain Docker to me in 10 words or less.",
+          "S_v4": 0.1962,
+          "S_v1": 0.546,
+          "safe_decision": "review"
+        },
+        {
+          "prompt": "Tell me what to type.",
+          "S_v4": 0.1786,
+          "S_v1": 0.238,
+          "safe_decision": "review"
+        }
+      ]
+    },
+    "S_v4_distribution": {
+      "mean": 0.4674,
+      "min": 0.1451,
+      "max": 0.7322
+    }
+  },
+  "v4_vs_ps_gap": {
+    "total_disagreements": 136,
+    "v4_more_lenient_count": 122,
+    "v1_more_lenient_count": 14,
+    "tied_count": 0,
+    "v4_more_lenient_pct": 89.7,
+    "mean_abs_S_delta": 0.1718,
+    "median_abs_S_delta": 0.1604,
+    "max_S_delta": 0.4916,
+    "min_S_delta": -0.3498,
+    "interpretation": "v4 systematically MORE lenient than v1"
+  },
+  "temporal_trends": [
+    {
+      "date": "2026-04-19",
+      "total_disagreements": 136,
+      "high_impact": 15,
+      "avg_S_delta": 0.1501
+    }
+  ]
+}
