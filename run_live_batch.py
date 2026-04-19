@@ -224,7 +224,8 @@ def run_batch(raw_prompts: list[dict], engine, start_idx: int = 0,
 
 
 def main():
-    from survival import SurvivalEngine, SurvivalConfig
+    from survival import SurvivalEngine, SurvivalConfig, _classify_failure_mode, set_monitor_action
+    from scripts.batch_monitor import MonitorState, scan, log_alerts, print_status, TIGHTENED_TAU_H
 
     # Config — use zhipu as primary provider
     cfg = SurvivalConfig(
@@ -247,6 +248,7 @@ def main():
                 sys.exit(1)
 
     engine = SurvivalEngine(cfg)
+    monitor = MonitorState()  # v2.1.2: alert-triggered routing state
 
     # Load prompts from the ONLY allowed source
     raw_prompts = load_raw_prompts(RAW_PROMPTS_PATH)
@@ -299,12 +301,35 @@ def main():
 
             print(f"  [{start + i + 1}/{end}] evaluating... ", end="", flush=True)
             try:
+                # v2.1.2: pre-classify prompt for monitor action routing
+                fm = _classify_failure_mode(prompt)
+                action = monitor.get_action(fm)
+                set_monitor_action(action)  # survival.py picks this up in log_disagreement
+
                 result = _eval_with_timeout(engine, prompt, API_TIMEOUT)
                 source_class = rec.get("class", "unknown")
 
                 # v2.1: extract safe_decision and shadow review flag
                 safe_decision = result.get("decision", result.get("v4", {}).get("decision", "?"))
                 needs_review = result.get("needs_shadow_review", False)
+
+                # v2.1.2: apply routing overrides (domain_knowledge-scoped, temporary)
+                monitor_action = "none"
+                if action == "forced_review" and fm == "domain_knowledge":
+                    needs_review = True
+                    safe_decision = "review"
+                    monitor_action = "forced_review"
+                elif action == "tightened_threshold" and fm == "domain_knowledge":
+                    s_v4 = result.get("v4", {}).get("S", 0.0)
+                    dec_v4 = result.get("v4", {}).get("decision", "")
+                    if dec_v4 == "accept" and s_v4 < TIGHTENED_TAU_H:
+                        needs_review = True
+                        safe_decision = "review"
+                        monitor_action = "tightened_threshold"
+
+                result["monitor_action"] = monitor_action
+                set_monitor_action("none")  # reset
+
                 if needs_review:
                     shadow_reviews += 1
 
@@ -318,8 +343,10 @@ def main():
                 dec_v1 = result.get("v1", {}).get("decision", "?")
                 div = "DIVERGE" if result.get("divergence") else "ok"
                 review_flag = " ⚠ SHADOW_REVIEW" if needs_review else ""
-                print(f"S_v4={s_v4:.3f} {dec_v4} v1={dec_v1} [{div}]{review_flag}")
+                action_flag = f" [MONITOR:{monitor_action}]" if monitor_action != "none" else ""
+                print(f"S_v4={s_v4:.3f} {dec_v4} v1={dec_v1} [{div}]{review_flag}{action_flag}")
                 batch_results.append(result)
+                monitor.tick()  # v2.1.2: decrement action expiry counters
             except (FuturesTimeoutError, TimeoutError):
                 print(f"TIMEOUT (>{API_TIMEOUT}s) — SKIP")
                 skip_qids.add(qid)
@@ -343,9 +370,8 @@ def main():
         append_metrics(metrics, METRICS_PATH)
         all_results.extend(batch_results)
 
-        # v2.1.1: streaming monitor (rolling windows 50/200)
+        # v2.1.2: streaming monitor (rolling windows 50/200) + action hooks
         try:
-            from scripts.batch_monitor import scan, log_alerts, print_status
             disc_path = os.path.join(DIR, "logs", "disagreement_cases.jsonl")
             disc_cases = []
             with open(disc_path) as df:
@@ -358,6 +384,9 @@ def main():
             for a in alerts:
                 print(f"  {a}")
             log_alerts(alerts)
+            monitor.update(alerts)  # v2.1.2: activate routing interventions
+            if monitor.active_actions:
+                print(f"  [MONITOR] active_actions={monitor.active_actions}")
         except Exception as e:
             print(f"  (monitor skipped: {e})")
 

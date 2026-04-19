@@ -63,6 +63,18 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 RAW_PROMPTS_PATH = os.path.join(DIR, "data", "raw_prompts.jsonl")
 DISAGREEMENT_LOG_PATH = os.path.join(DIR, "logs", "disagreement_cases.jsonl")
 
+# ── Monitor action hook (set by batch runner before eval, routing-layer only) ──
+_current_monitor_action = "none"
+
+def set_monitor_action(action: str) -> None:
+    """Set the current monitor action for the next evaluate_shadow() call.
+    Used by the batch runner to signal routing interventions.
+    Does NOT affect scoring, gating, or model behavior.
+    Values: 'none' | 'forced_review' | 'tightened_threshold'
+    """
+    global _current_monitor_action
+    _current_monitor_action = action
+
 # High-impact decision zones: disagreements here require shadow review
 # v4 says "accept" but S is in the danger zone near tau_h, or
 # v4 says "reject" but S is close to tau_l (potential over-rejection)
@@ -221,6 +233,7 @@ def log_disagreement(result: dict, reason: str = "") -> None:
         "failure_mode": failure_mode,
         "factuality_risk_flag": factuality_risk_flag,
         "reason": reason or ("high_impact_divergence" if is_high_impact else "low_impact_divergence"),
+        "monitor_action": _current_monitor_action,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
