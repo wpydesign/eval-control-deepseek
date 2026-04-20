@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-manifold_predict.py — Manifold-level control and intervention [v2.5.1]
+manifold_predict.py — Manifold-level control and intervention [v2.6.0]
 
 Decomposed failure manifold predictor with manifold-specific control policies.
 Each failure manifold has its own predictive surface AND its own action policy.
@@ -21,10 +21,18 @@ Three manifolds, three control regimes:
      - Action: allow_with_light_review only
      - Do NOT optimize here — optimizing boundary is noise
 
-Key design principle (v2.5.1):
+v2.6.0 addition — reference router drift tracking:
+  - Every predict() now dual-routes through π_live and π_ref
+  - Tracks manifold_disagreement = (m_live != m_ref)
+  - This feeds into router_drift_rate = P(m_live != m_ref)
+  - If drift > 0.15 → acquisition weight freeze
+  - If drift > 0.25 → fallback to balanced sampling
+
+Key design principle:
   - Overconfidence → ELIMINATED (rule)
   - Contradiction → COMPRESSED (learned surface)
   - Boundary → ACCEPTED (irreducible)
+  - Manifold decomposition → FIXED coordinate system (via π_ref)
 
 Usage:
   from scripts.manifold_predict import ManifoldPredictor
@@ -38,6 +46,8 @@ Usage:
   #     "per_manifold_scores": {...},
   #     "action": "allow_with_light_review",
   #     "has_model": True,
+  #     "m_ref": "boundary",           # reference router assignment
+  #     "manifold_disagreement": False,  # π_live != π_ref?
   # }
 """
 
@@ -51,6 +61,7 @@ from datetime import datetime, timezone
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MANIFOLD_MODEL_PATH = os.path.join(BASE, "model", "manifold_models.pkl")
 MANIFOLD_REPORT_PATH = os.path.join(BASE, "model", "manifold_report.json")
+REFERENCE_ROUTER_PATH = os.path.join(BASE, "model", "reference_router.pkl")
 
 # Per-manifold decision thresholds (v2.5.1: manifold-specific control)
 # Overconfidence: LOCKED DOWN — deterministic failure, no thresholds
@@ -71,6 +82,8 @@ class ManifoldPredictor:
     Instead of one model trying to represent three different failure geometries,
     this routes each sample to its appropriate manifold and applies the
     corresponding predictive surface.
+
+    v2.6.0: Every predict() also dual-routes through π_ref to detect manifold drift.
     """
 
     def __init__(self, model_path=None):
@@ -78,7 +91,9 @@ class ManifoldPredictor:
         self._models = None
         self._metadata = None
         self._loaded = False
+        self._ref_router = None
         self._load()
+        self._load_reference_router()
 
     @property
     def is_loaded(self):
@@ -132,6 +147,71 @@ class ManifoldPredictor:
         except Exception as e:
             print(f"  [MANIFOLD] Failed to load: {e}")
             return False
+
+    def _load_reference_router(self):
+        """Load frozen reference router π_ref for drift detection.
+
+        π_ref is immutable — it provides the fixed coordinate system
+        against which π_live routing is compared.
+        """
+        if not os.path.exists(REFERENCE_ROUTER_PATH):
+            print(f"  [MANIFOLD] No reference router (π_ref) — drift tracking disabled")
+            print(f"  [MANIFOLD] Run: python scripts/reference_router.py --freeze")
+            return False
+        try:
+            with open(REFERENCE_ROUTER_PATH, "rb") as f:
+                package = pickle.load(f)
+            self._ref_router = package.get("router")
+            frozen_at = package.get("frozen_at", "unknown")
+            print(f"  [MANIFOLD] Reference router (π_ref) loaded, frozen at {frozen_at[:19]}")
+            return True
+        except Exception as e:
+            print(f"  [MANIFOLD] Reference router load failed: {e}")
+            return False
+
+    def get_ref_router(self):
+        """Return the frozen reference router model."""
+        return self._ref_router
+
+    def dual_route(self, features, disagreement_flag=False):
+        """Route sample through both π_live and π_ref.
+
+        Returns:
+            dict with m_live, m_ref, manifold_disagreement
+        """
+        X = np.array([features], dtype=np.float64)
+        class_names = {0: "overconfidence", 1: "contradiction", 2: "boundary"}
+
+        m_ref = "unknown"
+        if self._ref_router is not None:
+            try:
+                ref_class = int(self._ref_router.predict(X)[0])
+                m_ref = class_names.get(ref_class, "boundary")
+            except Exception:
+                m_ref = "unknown"
+
+        # π_live routing (same logic as _route but returns the manifold directly)
+        if disagreement_flag and features[2] > 0.05:
+            m_live = "contradiction"
+        elif self._models.get("router") is not None:
+            try:
+                live_class = int(self._models["router"].predict(X)[0])
+                m_live = class_names.get(live_class, "boundary")
+            except Exception:
+                m_live = "boundary"
+        else:
+            if features[2] > 0.25 and features[3] < 0.35:
+                m_live = "overconfidence"
+            elif features[2] > 0.10:
+                m_live = "contradiction"
+            else:
+                m_live = "boundary"
+
+        return {
+            "m_live": m_live,
+            "m_ref": m_ref,
+            "manifold_disagreement": (m_live != m_ref),
+        }
 
     def _route(self, features, disagreement_flag=False):
         """Route a sample to its failure manifold.
@@ -301,6 +381,9 @@ class ManifoldPredictor:
             # Step 4: Determine action
             action = self._determine_action(risk_score, manifold)
 
+            # Step 5 (v2.6.0): Dual-route for drift detection
+            dual = self.dual_route(features, disagreement_flag)
+
             return {
                 "risk_score": risk_score,
                 "manifold": manifold,
@@ -309,6 +392,9 @@ class ManifoldPredictor:
                 "routing_method": routing["routing_method"],
                 "action": action,
                 "has_model": True,
+                "m_live": dual["m_live"],
+                "m_ref": dual["m_ref"],
+                "manifold_disagreement": dual["manifold_disagreement"],
             }
 
         except Exception as e:
@@ -391,11 +477,19 @@ class ManifoldPredictor:
                     if n1 != n2:
                         print(f"    {n1} <-> {n2}: {d:.4f}")
 
-        print(f"\n  [MANIFOLD] Control policies (v2.5.1):")
+        print(f"\n  [MANIFOLD] Control policies (v2.6.0):")
         print(f"    Overconfidence: ALWAYS force_reject_or_escalate (locked down)")
         print(f"    Contradiction:  escalate >= {CONTRADICTION_ESCALATE}, review >= {CONTRADICTION_REVIEW}")
         print(f"    Boundary:       light_review >= {BOUNDARY_LIGHT_REVIEW} (downgraded, minimal)")
         print(f"    Design: oc=ELIMINATED, cd=COMPRESSED, bd=ACCEPTED")
+
+        if self._ref_router is not None:
+            print(f"\n  [MANIFOLD] Reference router (π_ref): LOADED (frozen coordinate system)")
+            print(f"    Dual-route drift tracking: ACTIVE")
+            print(f"    Guardrails: WARNING at drift>0.15, CRITICAL at drift>0.25")
+        else:
+            print(f"\n  [MANIFOLD] Reference router (π_ref): NOT LOADED")
+            print(f"    Run: python scripts/reference_router.py --freeze")
 
 
 def main():

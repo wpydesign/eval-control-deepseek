@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """
-acquisition_policy.py — Manifold-aware data acquisition controller [v2.5.1]
+acquisition_policy.py — Manifold-aware data acquisition controller [v2.6.0]
+
+v2.6.0: Added drift guardrails and contradiction integrity protection.
 
 v2.5.1: REWRITTEN from channel-based to manifold-based allocation.
 
@@ -25,11 +27,18 @@ That is now outdated. The new system allocates by FAILURE MANIFOLD:
      - Goal: stability check only, NOT optimization
      - Source: high-entropy samples in uncertainty zone
 
+v2.6.0 additions — manifold stability protection:
+  - Drift guardrails: if router_drift_rate > 0.15, freeze acquisition weights
+  - Drift critical: if router_drift_rate > 0.25, fallback to 33/33/33
+  - Contradiction integrity: contradiction channel requires m_ref == "contradiction"
+  - No more self-reinforcing bias loops
+
 Design principle:
   - Shift from uncertainty sampling -> failure-manifold targeting
   - Contradiction gets the most resources because that is where gains exist
   - Boundary is explicitly capped to prevent wasting labels on noise
   - Blind-spot is discovery-oriented (monitor only, no learning)
+  - Manifold decomposition is a FIXED coordinate system (via π_ref)
 
 Adaptive weight update (v2.5.1):
   - Measures per-MANIFOLD label efficiency (not per-channel)
@@ -63,6 +72,8 @@ ACQUISITION_QUEUE_PATH = os.path.join(BASE, "logs", "acquisition_queue.jsonl")
 ACQUISITION_BUDGET_PATH = os.path.join(BASE, "logs", "acquisition_budget.json")
 CHANNEL_PERF_PATH = os.path.join(BASE, "logs", "channel_performance.jsonl")
 REWARD_BUFFER_PATH = os.path.join(BASE, "logs", "reward_buffer.jsonl")
+DRIFT_STATE_PATH = os.path.join(BASE, "logs", "drift_state.json")
+REFERENCE_ROUTER_PATH = os.path.join(BASE, "model", "reference_router.pkl")
 
 # Lag compensation: weight updates use performance from t-1, not t.
 # This prevents oscillation when the retrain loop runs at high throughput.
@@ -94,6 +105,15 @@ MAX_MANIFOLD_WEIGHT = {
     "contradiction": 0.75,   # can go up to 75%
     "blind_spot": 0.35,       # discovery cap
     "boundary": 0.20,         # HARD CAP — never more than 20%
+}
+
+# Drift guardrails (v2.6.0)
+DRIFT_WARNING = 0.15      # freeze acquisition weights
+DRIFT_CRITICAL = 0.25     # fallback to balanced 33/33/33
+BALANCED_FALLBACK = {
+    "contradiction": 0.333,
+    "blind_spot": 0.333,
+    "boundary": 0.334,
 }
 
 # Adaptive constraints
@@ -262,6 +282,106 @@ def assign_manifold_estimate(score_entry):
     return "boundary"
 
 
+def load_drift_state():
+    """Load drift state to check guardrails before acquisition.
+
+    Returns:
+        dict with drift_rate, status, or empty dict if no drift data
+    """
+    if not os.path.exists(DRIFT_STATE_PATH):
+        return {}
+    try:
+        with open(DRIFT_STATE_PATH) as f:
+            state = json.load(f)
+        return state.get("drift", {})
+    except Exception:
+        return {}
+
+
+def check_acquisition_guardrails(manifold_weights):
+    """Check drift guardrails and return adjusted weights + status.
+
+    v2.6.0: This prevents the self-reinforcing bias loop.
+    If router_drift_rate > 0.15 → freeze weights (no adaptation this cycle).
+    If router_drift_rate > 0.25 → fallback to balanced 33/33/33.
+
+    Returns:
+        tuple of (adjusted_weights, guardrail_action)
+    """
+    drift = load_drift_state()
+    drift_rate = drift.get("drift_rate", 0.0)
+    drift_status = drift.get("status", "STABLE")
+
+    if drift_status == "CRITICAL" or drift_rate >= DRIFT_CRITICAL:
+        print(f"\n  [GUARDRAIL] CRITICAL: router_drift_rate={drift_rate:.4f} >= {DRIFT_CRITICAL}")
+        print(f"  [GUARDRAIL] Action: FALLBACK to balanced 33/33/33 sampling")
+        print(f"  [GUARDRAIL] Reason: manifolds are moving — self-reinforcing bias detected")
+        return dict(BALANCED_FALLBACK), "FALLBACK_BALANCED"
+
+    if drift_status == "WARNING" or drift_rate >= DRIFT_WARNING:
+        print(f"\n  [GUARDRAIL] WARNING: router_drift_rate={drift_rate:.4f} >= {DRIFT_WARNING}")
+        print(f"  [GUARDRAIL] Action: FREEZE acquisition weights (no adaptation this cycle)")
+        return manifold_weights, "FREEZE_WEIGHTS"
+
+    return manifold_weights, "NONE"
+
+
+def validate_contradiction_samples(score_map, manifold_weights):
+    """Filter contradiction samples using π_ref integrity check.
+
+    v2.6.0: If a sample is routed to 'contradiction' by π_live but π_ref
+    disagrees, it must be REJECTED from the contradiction channel.
+    This stops leakage and prevents the live model from redefining contradiction.
+
+    Returns:
+        filtered score_map with integrity-violating samples flagged
+    """
+    if not os.path.exists(REFERENCE_ROUTER_PATH):
+        return score_map  # no π_ref → no integrity check
+
+    import pickle
+    try:
+        with open(REFERENCE_ROUTER_PATH, "rb") as f:
+            package = pickle.load(f)
+        ref_router = package.get("router")
+        if ref_router is None:
+            return score_map
+    except Exception:
+        return score_map
+
+    from scipy.stats import rankdata
+    rejected = 0
+    for qid, s in score_map.items():
+        if s.get("estimated_manifold") != "contradiction":
+            continue
+
+        # Build features for routing
+        s_v4 = s.get("uncertainty_raw", 0.5)  # proxy
+        s_v1 = 1.0 - s.get("uncertainty_raw", 0.5)
+        gap = abs(s_v4 - s_v1)
+        features = np.array([s_v4, s_v1, gap, 0.3])
+
+        try:
+            ref_class = int(ref_router.predict(features.reshape(1, -1))[0])
+            class_names = {0: "overconfidence", 1: "contradiction", 2: "boundary"}
+            m_ref = class_names.get(ref_class, "boundary")
+
+            if m_ref != "contradiction":
+                # π_ref says this is NOT contradiction — reject
+                s["contradiction_integrity"] = "REJECTED"
+                s["contradiction_rejection_reason"] = f"π_ref={m_ref}"
+                rejected += 1
+            else:
+                s["contradiction_integrity"] = "VALID"
+        except Exception:
+            pass
+
+    if rejected > 0:
+        print(f"  [INTEGRITY] Rejected {rejected} samples from contradiction channel (π_ref mismatch)")
+
+    return score_map
+
+
 def allocate_manifold_targets(score_map, budget, manifold_weights):
     """Manifold-targeted allocation (v2.5.1).
 
@@ -295,6 +415,11 @@ def allocate_manifold_targets(score_map, budget, manifold_weights):
     # Phase 1: fill each manifold's quota from its own ranking
     # Sort by manifold-relevant signals
     # Contradiction: prioritize high-risk + high-uncertainty (disagreement signal)
+    # v2.6.0: filter out integrity-rejected samples (π_ref != "contradiction")
+    by_manifold["contradiction"] = [
+        s for s in by_manifold["contradiction"]
+        if s.get("contradiction_integrity", "VALID") != "REJECTED"
+    ]
     by_manifold["contradiction"].sort(
         key=lambda x: x.get("risk_score", 0) * 0.5 + x.get("uncertainty_norm", 0) * 0.5,
         reverse=True
@@ -681,18 +806,29 @@ def main():
         print("  No candidates remaining (all labeled or no queues).")
         return
 
-    # Step 3: manifold-targeted allocation (v2.5.1)
+    # Step 3: manifold-targeted allocation (v2.6.0: with drift guardrails)
     print(f"\nAllocating epistemic budget ({budget} labels)...")
+
+    # v2.6.0: Check drift guardrails BEFORE allocation
+    manifold_weights, guardrail_action = check_acquisition_guardrails(manifold_weights)
+    if guardrail_action != "NONE":
+        print(f"  [GUARDRAIL] Weights adjusted: {manifold_weights}")
+
+    # v2.6.0: Validate contradiction integrity BEFORE allocation
+    score_map = validate_contradiction_samples(score_map, manifold_weights)
+
     alloc = allocate_manifold_targets(score_map, budget, manifold_weights)
     samples = alloc["samples"]
 
     # Report
     mc = alloc["manifold_counts"]
     print(f"\n{'='*65}")
-    print(f"  MANIFOLD-AWARE DATA ACQUISITION [v2.5.1]")
+    print(f"  MANIFOLD-AWARE DATA ACQUISITION [v2.6.0]")
     print(f"{'='*65}")
     print(f"  Candidate pool:       {len(score_map)} unlabeled samples")
     print(f"  Epistemic budget:     {alloc['total_budget']} labels")
+    if guardrail_action != "NONE":
+        print(f"  Guardrail:           {guardrail_action} (drift protection active)")
     print(f"  Manifold weights:     cd={manifold_weights['contradiction']:.0%}  "
           f"bs={manifold_weights['blind_spot']:.0%}  bd={manifold_weights['boundary']:.0%}")
     print(f"  Manifold allocation:  cd={alloc['allocation']['contradiction']}  "
@@ -740,9 +876,11 @@ def main():
     # Save budget state
     budget_state = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "version": "v2.5.1",
+        "version": "v2.6.0",
         "allocation_mode": "manifold_aware",
+        "guardrail_action": guardrail_action,
         "manifold_weights": manifold_weights,
+        "original_weights": dict(DEFAULT_MANIFOLD_WEIGHTS),  # before guardrail
         "legacy_channel_weights": weights,  # kept for compat
         "budget": budget,
         "allocation": alloc["allocation"],

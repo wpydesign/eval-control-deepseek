@@ -29,3 +29,4 @@ credentials.json
 *.log
 model/
 logs/failure_dataset.jsonl
+logs/*.jsonl

@@ -1,22 +1,25 @@
 #!/usr/bin/env python3
 """
-manifold_kpi.py — Manifold-level KPI tracker [v2.5.1]
+manifold_kpi.py — Manifold-level KPI tracker [v2.6.0]
 
 Replaces global metrics (AUC, ECE) with manifold-specific KPIs.
 Global metrics are now misleading — they average over three different
 failure geometries with fundamentally different characteristics.
 
-Primary KPIs (v2.5.1):
-  1. contradiction_recall    — PRIMARY KPI: are we catching contradiction failures?
-  2. overconfidence_capture  — STABILITY CHECK: should be ~100%
-  3. boundary_accept_rate    — STABILITY CHECK: should be high (~80%+)
+Primary KPIs (v2.6.0):
+  1. router_drift_rate      — THE REAL KPI: P(m_live != m_ref), manifold stability
+  2. contradiction_recall    — PRIMARY KPI: are we catching contradiction failures?
+  3. overconfidence_capture  — STABILITY CHECK: should be ~100%
+  4. boundary_accept_rate    — STABILITY CHECK: should be high (~80%+)
 
 Secondary metrics:
   - contradiction_precision — cost of escalation (false escalation rate)
   - manifold_distribution   — are we allocating labels correctly?
   - per_manifold_auc        — AUC is meaningful ONLY within manifolds
+  - drift_guardrail_status — OK / WARNING / CRITICAL
 
 Design principle:
+  - If router_drift_rate is rising → manifolds are moving (DANGER)
   - If contradiction_recall improves → system improves
   - If overconfidence_capture < 100% → detection is failing
   - If boundary_accept_rate drops → something broke (check)
@@ -39,6 +42,8 @@ BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BATCH_LABELS_PATH = os.path.join(BASE, "logs", "batch_label_results.jsonl")
 DATASET_PATH = os.path.join(BASE, "logs", "failure_dataset.jsonl")
 KPI_SNAPSHOT_DIR = os.path.join(BASE, "logs", "manifold_kpi_snapshots")
+DRIFT_LOG_PATH = os.path.join(BASE, "logs", "router_drift_log.jsonl")
+DRIFT_STATE_PATH = os.path.join(BASE, "logs", "drift_state.json")
 
 
 def load_jsonl(path):
@@ -170,18 +175,112 @@ def compute_manifold_kpis():
         "boundary_pct": round(bd_total / total_labeled if total_labeled > 0 else 0, 4),
     }
 
+    # --- ROUTER DRIFT RATE (v2.6.0: THE REAL KPI) ---
+    drift = compute_router_drift()
+    kpis["router_drift"] = drift
+
     kpis["computed_at"] = datetime.now(timezone.utc).isoformat()
-    kpis["version"] = "v2.5.1"
+    kpis["version"] = "v2.6.0"
 
     return kpis
+
+
+def compute_router_drift():
+    """Compute router_drift_rate from drift log.
+
+    Returns:
+        dict with drift_rate, window_size, n_disagreements, status
+    """
+    if not os.path.exists(DRIFT_LOG_PATH):
+        return {
+            "drift_rate": 0.0,
+            "window_size": 0,
+            "n_disagreements": 0,
+            "status": "NO_DATA",
+            "interpretation": "No drift log found — run prediction with π_ref loaded",
+        }
+
+    entries = []
+    with open(DRIFT_LOG_PATH) as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                try:
+                    entries.append(json.loads(line))
+                except json.JSONDecodeError:
+                    pass
+
+    if not entries:
+        return {
+            "drift_rate": 0.0,
+            "window_size": 0,
+            "n_disagreements": 0,
+            "status": "NO_DATA",
+            "interpretation": "Drift log is empty",
+        }
+
+    # Use last 100 entries (rolling window)
+    window = entries[-100:]
+    n = len(window)
+    n_disc = sum(1 for e in window if e.get("manifold_disagreement", False))
+    rate = n_disc / n
+
+    # Import thresholds from reference_router
+    sys.path.insert(0, os.path.dirname(__file__))
+    try:
+        from reference_router import DRIFT_WARNING, DRIFT_CRITICAL
+    except ImportError:
+        DRIFT_WARNING = 0.15
+        DRIFT_CRITICAL = 0.25
+
+    if rate >= DRIFT_CRITICAL:
+        status = "CRITICAL"
+        interpretation = "Manifold decomposition drifting severely — fallback to balanced sampling"
+    elif rate >= DRIFT_WARNING:
+        status = "WARNING"
+        interpretation = "Manifold boundaries shifting — freeze acquisition weights"
+    else:
+        status = "STABLE"
+        interpretation = "Decomposition stable — normal operation"
+
+    # Disagreement pattern breakdown
+    disc_entries = [e for e in window if e.get("manifold_disagreement", False)]
+    patterns = {}
+    for e in disc_entries:
+        key = f"{e.get('m_ref','?')}->{e.get('m_live','?')}"
+        patterns[key] = patterns.get(key, 0) + 1
+
+    return {
+        "drift_rate": round(rate, 4),
+        "window_size": n,
+        "n_disagreements": n_disc,
+        "status": status,
+        "interpretation": interpretation,
+        "patterns": patterns,
+    }
 
 
 def print_kpis(kpis):
     """Print KPI dashboard."""
     print("=" * 65)
-    print("  MANIFOLD KPI DASHBOARD [v2.5.1]")
+    print("  MANIFOLD KPI DASHBOARD [v2.6.0]")
     print("=" * 65)
     print(f"  Computed: {kpis['computed_at'][:19]}")
+
+    # --- ROUTER DRIFT: THE REAL KPI ---
+    drift = kpis.get("router_drift", {})
+    drift_rate = drift.get("drift_rate", 0)
+    drift_status = drift.get("status", "NO_DATA")
+    drift_icon = {"STABLE": "OK", "WARNING": "!!", "CRITICAL": "!!!", "NO_DATA": "..."}.get(drift_status, "?")
+    print(f"\n  >> ROUTER DRIFT (THE REAL KPI): {drift_icon}")
+    print(f"     drift_rate:  {drift_rate:.4f}  ({drift.get('n_disagreements',0)}/{drift.get('window_size',0)})")
+    print(f"     status:      {drift_status}")
+    print(f"     meaning:     {drift.get('interpretation', 'N/A')}")
+    patterns = drift.get("patterns", {})
+    if patterns:
+        print(f"     patterns:")
+        for p, c in sorted(patterns.items(), key=lambda x: -x[1])[:5]:
+            print(f"       {p:30s}: {c}")
 
     g = kpis["global"]
     print(f"\n  Global (reference only, NOT decision driver):")
@@ -219,6 +318,10 @@ def print_kpis(kpis):
 
     # Verdict
     issues = []
+    if drift_status == "CRITICAL":
+        issues.append("ROUTER DRIFT CRITICAL — manifolds moving, fallback to 33/33/33")
+    elif drift_status == "WARNING":
+        issues.append("ROUTER DRIFT WARNING — freeze acquisition weights")
     if oc["capture_rate"] < 0.95:
         issues.append("OVERCONFIDENCE CAPTURE LOW — detection failing")
     if cd["n"] == 0:
