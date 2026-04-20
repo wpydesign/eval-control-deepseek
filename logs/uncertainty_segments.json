@@ -1,0 +1,31 @@
+{
+  "timestamp": "2026-04-20T02:00:04.595655+00:00",
+  "total_samples": 392,
+  "excluded": 1,
+  "clean": 391,
+  "segments": {
+    "ambiguous": {
+      "count": 374,
+      "pct": 95.4,
+      "clean_count": 374
+    },
+    "blind_spot": {
+      "count": 12,
+      "pct": 3.1,
+      "clean_count": 12
+    },
+    "noise": {
+      "count": 6,
+      "pct": 1.5,
+      "clean_count": 5
+    }
+  },
+  "flag_counts": {
+    "low_kappa": 1
+  },
+  "labeling_priority": {
+    "ambiguous": 374,
+    "blind_spot": 12,
+    "noise": 5
+  }
+}
