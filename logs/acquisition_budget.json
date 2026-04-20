@@ -1,0 +1,22 @@
+{
+  "timestamp": "2026-04-20T00:29:42.552239+00:00",
+  "weights": {
+    "uncertainty": 0.5,
+    "blind_spot": 0.35,
+    "cost": 0.15
+  },
+  "budget": 50,
+  "allocation": {
+    "uncertainty": 25,
+    "blind_spot": 17,
+    "cost": 7
+  },
+  "channel_counts": {
+    "uncertainty": 25,
+    "blind_spot": 17,
+    "cost": 7,
+    "unified_fallback": 1
+  },
+  "n_candidates": 715,
+  "n_labeled": 140
+}

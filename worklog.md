@@ -1,61 +1,51 @@
+# Eval-Control Worklog
+
 ---
 Task ID: 1
 Agent: main
-Task: Build unified observation pipeline (GPT directive: raw_prompts only, no synthetic data)
+Task: Add persistent cross-run memory + action suppression (v2.1.4)
 
 Work Log:
-- Audited existing log files: shadow_200_log.jsonl (200), real_cases_phase1.jsonl (59), survival_log.jsonl (7)
-- Extracted 207 unique real prompts into data/raw_prompts.jsonl (200 shadow + 7 api_log)
-- Created run_live_batch.py: reads ONLY from data/raw_prompts.jsonl, batches of 20, no retry
-- Migrated 200 shadow_200_log results → logs/shadow_eval_live.jsonl (avoiding redundant API calls)
-- Recomputed all decisions at tau_h=0.70 (v2.0-survival-stable): bad_accepted=1, good_rejected=0
-- Added class labels from dataset_shadow_200.json (70 good, 60 borderline, 70 bad)
-- Created logs/daily_metrics.jsonl with initial snapshot
-- Dry run: 7 pending prompts (from survival_log.jsonl), 200 already evaluated
+- Read existing batch_monitor.py (v2.1.3 with post-action evaluation already implemented)
+- Read run_live_batch.py and survival.py for integration context
+- Added MONITOR_STATS_PATH, SUPPRESSION_LOG_PATH, SUPPRESSION_THRESHOLD constants
+- Added MonitorState._load_stats() — loads from monitor_stats.json with graceful fallback
+- Added MonitorState._save_stats() — writes cumulative counters after every action expiry
+- Added MonitorState._is_suppressed() — checks if ineffective/total > 50% AND total >= 2
+- Added MonitorState._log_suppression() — logs suppression events to monitor_suppressions.jsonl
+- Updated MonitorState.update() — checks suppression before activating, logs if suppressed
+- Updated MonitorState._evaluate_action() — increments persistent counters + saves
+- Added persistent_stats and suppressed_events properties
+- Updated run_live_batch.py — prints persistent stats on startup, logs suppression count per batch
+- Created test_monitor_persistence.py — 54 unit tests covering all new functionality
+- All 54 tests pass, validated against 149 backfilled cases
+- Committed as 394fdfb, tag v2.1.4-persistence-memory
 
 Stage Summary:
-- Pipeline: data/raw_prompts.jsonl → run_live_batch.py → logs/shadow_eval_live.jsonl + logs/daily_metrics.jsonl
-- Metrics at tau_h=0.70: bad_accepted=1, good_rejected=0, divergence_rate=23%, S_mean=0.483
-- 7 prompts pending (old api_log entries), will be evaluated when pipeline runs
-- OBSERVATION MODE ACTIVE: no new prompts generated, no synthetic data, real logs only
+- **New files**: scripts/test_monitor_persistence.py
+- **Modified files**: scripts/batch_monitor.py, run_live_batch.py
+- **New artifacts**: logs/monitor_stats.json, logs/monitor_suppressions.jsonl
+- **Control loop now complete**: detection → reaction → evaluation → memory
+- **No changes to**: scoring, gating, model, thresholds, engine architecture
+- **Stack**: detection (v2.1.1) → reaction (v2.1.2) → evaluation (v2.1.3) → memory (v2.1.4)
+
 ---
-Task ID: 3
-Agent: main (Zai)
-Task: Replace weekly cadence with streaming rolling-window monitor
+Task ID: strategic-2
+Agent: main
+Task: Strategic assessment — architecture saturation, data leverage phase
 
 Work Log:
-- Created scripts/batch_monitor.py (~140 lines) — event-driven monitor
-- Rolling windows: 50 (fast spike) and 200 (drift)
-- Alert rules: risk_spike>=2 (w50), false_accept>=3 (w200), dk_HI_rate>0.5 (w200), gap_mean>0.15 (w200)
-- Integrated into run_live_batch.py: auto-runs after each batch
-- One-shot mode and --watch (tail-follow) mode
-- Logs alerts to logs/monitor_alerts.jsonl
-- Validated: fires FALSE_ACCEPT count=6 on 149 backfilled cases
-- No model/scoring/gating changes — pure monitoring layer
+- Reviewed full system state at v2.2.2-data-flywheel
+- Confirmed architecture is complete: prediction → calibration → decision → monitoring → targeted data acquisition
+- Identified that we've entered the "diminishing-architecture-return" phase
 
 Stage Summary:
-- Committed as 66807fc, tag v2.1.1-streaming-monitor
-- weekly_report.py preserved but superseded by batch_monitor.py
-- Zero false positive alerts on dk_HI_rate, risk_spike, gap_mean
-- One real alert: FALSE_ACCEPT count=6 (matches known factuality_risk_flags)
----
-Task ID: 4
-Agent: main (Zai)
-Task: Add alert-triggered routing actions (detection → controlled reaction)
-
-Work Log:
-- Added MonitorState class to batch_monitor.py (stateful action controller)
-- Action mapping: RISK_SPIKE→forced_review, FALSE_ACCEPT→tightened_threshold(0.80), DK_DRIFT/GAP_DRIFT→log-only
-- All actions: temporary (50-sample auto-expiry), scoped to domain_knowledge only
-- Staggered cascade: both alerts active → forced_review first (50 ticks), then tightened_threshold (next 50)
-- Added set_monitor_action() hook to survival.py for cross-module state passing
-- Added monitor_action field to log_disagreement() entry dict
-- Updated run_live_batch.py: pre-classify prompt, apply routing overrides, tick counters per sample
-- Non-domain_knowledge prompts: always get_action="none" — zero impact on other modes
-- Validated: expiry at 50 ticks, staggered cascade, log-only alerts, existing data scan
-
-Stage Summary:
-- Committed as 533e86c, tag v2.1.2-alert-actions
-- Zero model/scoring/gating changes
-- Detection now has controlled reaction at routing layer
-- Full audit trail: monitor_action field in disagreement_cases.jsonl + shadow_eval_live.jsonl
+- **System status**: v2.2.2 — closed data flywheel operational
+- **Key metrics**: AUC=0.8465, ECE=0.05, cost-optimized thresholds (review>0.10, escalate>0.85)
+- **471 boundary samples** identified in uncertainty zone (highest information gain)
+- **932 unlabeled samples** queued for labeling (logs/active_learning_queue.jsonl)
+- **Drift monitor** operational (ECE warning at >0.08, critical at >0.12)
+- **Architecture space**: SATURATED — no more modules/heuristics/control logic needed
+- **Only remaining leverage**: data selection (labeling strategy > calibration > model design)
+- **Next conceptual step**: adversarial label acquisition policy (force model to expose blind spots faster)
+- **Improvement hierarchy**: data > labeling strategy > calibration > model design

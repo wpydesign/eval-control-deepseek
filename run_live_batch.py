@@ -446,16 +446,27 @@ def main():
         print(f"  (metrics appended to {METRICS_PATH})\n")
 
         # v2.2.0: periodic retrain every 5 batches (close the loop)
+        # v2.3.0: + adaptive weight update after retrain
         if (b + 1) % 5 == 0 and predictor.is_loaded:
-            print("  [PREDICTOR] Periodic retrain check (every 5 batches)...")
+            print("  [PREDICTOR] Periodic retrain + weight adaptation (every 5 batches)...")
             try:
+                pre_auc = predictor.metadata.get("metrics", {}).get("auc", "N/A")
                 predictor.retrain()
+                post_auc = predictor.metadata.get("metrics", {}).get("auc", "N/A")
+                print(f"  [PREDICTOR] AUC: {pre_auc} -> {post_auc}")
+
+                # v2.3.0: adapt channel weights based on realized outcomes
+                try:
+                    from scripts.acquisition_policy import update_weights_cli
+                    update_weights_cli()
+                except Exception as ae:
+                    print(f"  [ACQUISITION] Weight adaptation skipped: {ae}")
             except Exception as e:
                 print(f"  [PREDICTOR] Retrain skipped: {e}")
 
     # Summary
     print("=" * 55)
-    print("  v2.2 PIPELINE COMPLETE — v4 = π_E, v1 = π_S (audit) + predictor")
+    print("  v2.3 PIPELINE COMPLETE — v4 = π_E, v1 = π_S + predictor + adaptive acquisition")
     print("=" * 55)
     final = compute_batch_metrics(all_results)
     total_live = sum(1 for _ in open(LIVE_LOG_PATH)) if os.path.exists(LIVE_LOG_PATH) else 0
