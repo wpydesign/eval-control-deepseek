@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
 """
-manifold_kpi.py — Manifold-level KPI tracker [v2.6.0]
+manifold_kpi.py — Manifold-level KPI tracker [v2.6.1]
 
 Replaces global metrics (AUC, ECE) with manifold-specific KPIs.
 Global metrics are now misleading — they average over three different
 failure geometries with fundamentally different characteristics.
 
-Primary KPIs (v2.6.0):
-  1. router_drift_rate      — THE REAL KPI: P(m_live != m_ref), manifold stability
-  2. contradiction_recall    — PRIMARY KPI: are we catching contradiction failures?
-  3. overconfidence_capture  — STABILITY CHECK: should be ~100%
-  4. boundary_accept_rate    — STABILITY CHECK: should be high (~80%+)
+Primary KPIs (v2.6.1):
+  1. router_drift_rate      — monitors manifold GEOMETRY stability
+  2. ref_decay              — monitors REFERENCE TRUTH (this decides everything)
+  3. contradiction_wrong_rate — PRIMARY domain KPI: are we catching failures?
+  4. overconfidence_capture  — STABILITY CHECK: should be ~100%
+  5. boundary_accept_rate    — STABILITY CHECK: should be high (~80%+)
 
 Secondary metrics:
-  - contradiction_precision — cost of escalation (false escalation rate)
+  - contradiction_precision — cost of escalation
+  - ref_accuracy / live_accuracy — router vs router accuracy
   - manifold_distribution   — are we allocating labels correctly?
-  - per_manifold_auc        — AUC is meaningful ONLY within manifolds
-  - drift_guardrail_status — OK / WARNING / CRITICAL
 
 Design principle:
-  - If router_drift_rate is rising → manifolds are moving (DANGER)
-  - If contradiction_recall improves → system improves
-  - If overconfidence_capture < 100% → detection is failing
-  - If boundary_accept_rate drops → something broke (check)
+  - If ref_decay drops below -0.10 → π_ref is stale → controlled refresh
+  - If ref_decay > 0 → π_live drifting wrong → keep current anchor
+  - If router_drift_rate rising → manifolds moving (DANGER)
+  - If contradiction_wrong_rate improves → system improves
   - Global AUC is NOT a decision driver anymore
 
 Usage:
@@ -175,14 +175,39 @@ def compute_manifold_kpis():
         "boundary_pct": round(bd_total / total_labeled if total_labeled > 0 else 0, 4),
     }
 
-    # --- ROUTER DRIFT RATE (v2.6.0: THE REAL KPI) ---
+    # --- ROUTER DRIFT RATE (v2.6.0: geometry KPI) ---
     drift = compute_router_drift()
     kpis["router_drift"] = drift
 
+    # --- REFERENCE STALENESS (v2.6.1: truth KPI — this decides everything) ---
+    ref_staleness = compute_ref_staleness()
+    kpis["ref_staleness"] = ref_staleness
+
     kpis["computed_at"] = datetime.now(timezone.utc).isoformat()
-    kpis["version"] = "v2.6.0"
+    kpis["version"] = "v2.6.1"
 
     return kpis
+
+
+def compute_ref_staleness():
+    """Compute ref vs live accuracy and ref_decay from reference_router.
+
+    Delegates to ReferenceRouter.compute_ref_accuracy() which:
+      - Loads labeled samples with true manifold annotations
+      - Routes each through both π_ref and π_live
+      - Computes ref_accuracy, live_accuracy, ref_decay
+    """
+    sys.path.insert(0, os.path.dirname(__file__))
+    try:
+        from reference_router import ReferenceRouter
+        ref = ReferenceRouter()
+        return ref.compute_ref_accuracy()
+    except Exception:
+        return {
+            "ref_accuracy": 0.0, "live_accuracy": 0.0, "ref_decay": 0.0,
+            "n_evaluated": 0, "status": "NO_DATA",
+            "interpretation": "Could not compute ref staleness",
+        }
 
 
 def compute_router_drift():
@@ -263,16 +288,37 @@ def compute_router_drift():
 def print_kpis(kpis):
     """Print KPI dashboard."""
     print("=" * 65)
-    print("  MANIFOLD KPI DASHBOARD [v2.6.0]")
+    print("  MANIFOLD KPI DASHBOARD [v2.6.1]")
     print("=" * 65)
     print(f"  Computed: {kpis['computed_at'][:19]}")
 
-    # --- ROUTER DRIFT: THE REAL KPI ---
+    # --- REFERENCE STALENESS (v2.6.1: this decides everything) ---
+    staleness = kpis.get("ref_staleness", {})
+    ref_decay = staleness.get("ref_decay", 0)
+    staleness_status = staleness.get("status", "NO_DATA")
+    staleness_icon = {
+        "VALID": "OK",
+        "REF_AGING": "~",
+        "REF_STALE": "!!",
+        "LIVE_DRIFTING_WRONG": "<<",
+        "NO_DATA": "...",
+        "NO_REF_ROUTER": "...",
+        "NO_LABELED_DATA": "...",
+    }.get(staleness_status, "?")
+    print(f"\n  >> REFERENCE STALENESS (truth monitor): {staleness_icon}")
+    print(f"     ref_accuracy:  {staleness.get('ref_accuracy', 0):.4f}")
+    print(f"     live_accuracy: {staleness.get('live_accuracy', 0):.4f}")
+    print(f"     ref_decay:     {ref_decay:+.4f}  (ref - live)")
+    print(f"     n_evaluated:   {staleness.get('n_evaluated', 0)}")
+    print(f"     status:        {staleness_status}")
+    print(f"     meaning:       {staleness.get('interpretation', 'N/A')}")
+
+    # --- ROUTER DRIFT (geometry monitor) ---
     drift = kpis.get("router_drift", {})
     drift_rate = drift.get("drift_rate", 0)
     drift_status = drift.get("status", "NO_DATA")
     drift_icon = {"STABLE": "OK", "WARNING": "!!", "CRITICAL": "!!!", "NO_DATA": "..."}.get(drift_status, "?")
-    print(f"\n  >> ROUTER DRIFT (THE REAL KPI): {drift_icon}")
+    print(f"\n  >> ROUTER DRIFT (geometry monitor): {drift_icon}")
     print(f"     drift_rate:  {drift_rate:.4f}  ({drift.get('n_disagreements',0)}/{drift.get('window_size',0)})")
     print(f"     status:      {drift_status}")
     print(f"     meaning:     {drift.get('interpretation', 'N/A')}")
@@ -318,16 +364,20 @@ def print_kpis(kpis):
 
     # Verdict
     issues = []
+    if staleness_status == "REF_STALE":
+        issues.append(f"REFERENCE STALE — ref_decay={ref_decay:+.4f} < -0.10, consider controlled refresh")
+    elif staleness_status == "LIVE_DRIFTING_WRONG":
+        issues.append(f"LIVE DRIFTING WRONG — ref_decay={ref_decay:+.4f} > 0, keep current anchor")
     if drift_status == "CRITICAL":
-        issues.append("ROUTER DRIFT CRITICAL — manifolds moving, fallback to 33/33/33")
+        issues.append("ROUTER DRIFT CRITICAL -- manifolds moving, fallback to 33/33/33")
     elif drift_status == "WARNING":
-        issues.append("ROUTER DRIFT WARNING — freeze acquisition weights")
+        issues.append("ROUTER DRIFT WARNING -- freeze acquisition weights")
     if oc["capture_rate"] < 0.95:
-        issues.append("OVERCONFIDENCE CAPTURE LOW — detection failing")
+        issues.append("OVERCONFIDENCE CAPTURE LOW -- detection failing")
     if cd["n"] == 0:
-        issues.append("NO CONTRADICTION DATA — cannot measure primary KPI")
+        issues.append("NO CONTRADICTION DATA -- cannot measure primary KPI")
     if bd["accept_rate"] < 0.70:
-        issues.append("BOUNDARY ACCEPT DEGRADED — check for regression")
+        issues.append("BOUNDARY ACCEPT DEGRADED -- check for regression")
 
     if issues:
         print(f"\n  ISSUES:")
