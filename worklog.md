@@ -198,3 +198,47 @@ Stage Summary:
   - Manifold stability: ✅ (now fixed)
 - **Committed**: 45fa083, tag v2.6.0-reference-router
 - **No changes to**: scoring, thresholds, manifold heads, contradiction/boundary classifiers, control actions
+
+---
+Task ID: 7
+Agent: main
+Task: v2.6.1 — reference staleness detection + controlled refresh
+
+Work Log:
+- Identified reference staleness gap: π_ref frozen at v2.5.1 but system keeps learning
+  on top of it. Over time π_ref becomes "historical bias" not "ground truth"
+- Added compute_ref_accuracy() to ReferenceRouter:
+  - Loads all 1086 labeled samples with true manifold annotations
+  - Routes each through both π_ref and π_live (separate router objects)
+  - Computes ref_correct and live_correct per sample
+  - Aggregates to ref_accuracy, live_accuracy, ref_decay = ref_accuracy - live_accuracy
+  - Per-manifold accuracy breakdown
+  - Status: VALID | REF_AGING | REF_STALE | LIVE_DRIFTING_WRONG
+- Added check_ref_refresh(): controlled refresh rule, ALL conditions must be met:
+  1. ref_decay < -0.10 (π_live is 10%+ more accurate than π_ref)
+  2. n_evaluated >= REF_MIN_EVAL_SAMPLES (200)
+  3. cycles_since_refresh >= REF_COOLDOWN (3 cycles)
+- Added controlled_refresh(): discrete jump — snapshots π_live as new π_ref,
+  resets drift buffer + drift log, updates refresh history, enforces cooldown
+- Added increment_cycle(): tracks cooldown between refreshes
+- Added _refresh_history persistence in drift_state.json
+- Updated manifold_kpi.py: ref_decay shown FIRST in dashboard (truth > geometry)
+- Verified baseline: ref_decay = +0.0000 (π_ref frozen from same router as π_live)
+
+Stage Summary:
+- **Modified files**: scripts/reference_router.py, scripts/manifold_kpi.py
+- **New artifacts**: logs/ref_refresh_log.jsonl
+- **Key concept**: ref_decay monitors whether the anchor is still truthful
+- **Controlled refresh**: ref_decay < -0.10 + n>200 + cooldown>3 → discrete jump
+- **Cooldown**: REF_COOLDOWN = 3 cycles between refreshes (prevents oscillation)
+- **Interpretation**: ref_decay≈0=valid, <0=π_ref stale, >0=π_live drifting wrong
+- **Baseline**: ref_accuracy=0.8232, live_accuracy=0.8232, ref_decay=+0.0000
+- **Committed**: a278722, tag v2.6.1-ref-staleness
+- **Full control system (final form)**:
+  - π_live learns
+  - π_ref anchors
+  - drift monitors geometry
+  - ref_decay monitors truth
+  - guardrails stabilize
+  - refresh updates anchor (rarely, with cooldown)
+- **No changes to**: scoring, thresholds, manifold heads, control actions, acquisition policy
