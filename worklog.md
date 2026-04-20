@@ -146,4 +146,55 @@ Stage Summary:
 - **Router**: 3-class multinomial LR, confidence_gap dominant (importance=4.74)
 - **Decision thresholds**: per-manifold (overconfidence=always escalate, contradiction=0.50, boundary=0.35)
 - **What was NOT done**: no AUC recovery, no threshold retuning, no weight rebalancing
-- **Committed**: pending
+- **Committed**: 01a9478, tag v2.5.0-manifold-decomposition
+
+---
+Task ID: 6
+Agent: main
+Task: v2.6.0 — reference router + drift tracking (fixed coordinate system)
+
+Work Log:
+- Identified manifold stability gap: π_live trains on contradiction-biased data (65%),
+  creating self-reinforcing bias loop that silently shifts manifold boundaries
+- Created scripts/reference_router.py — ReferenceRouter class:
+  - freeze(): snapshots current router as π_ref (immutable)
+  - dual_route(): routes every sample through both π_live and π_ref
+  - compute_drift_rate(): rolling P(m_live != m_ref) over 100-sample window
+  - check_guardrails(): WARNING at >0.15 (freeze weights), CRITICAL at >0.25 (fallback 33/33/33)
+  - validate_contradiction_integrity(): rejects samples where π_ref != "contradiction"
+- Modified scripts/manifold_predict.py:
+  - predict() now returns m_live, m_ref, manifold_disagreement in every call
+  - Loads π_ref on init, dual-routes every sample silently
+  - Status report shows drift tracking state and guardrail thresholds
+- Modified scripts/acquisition_policy.py:
+  - check_acquisition_guardrails(): checks drift state before allocation
+  - validate_contradiction_samples(): filters π_ref-mismatched contradiction candidates
+  - allocate_manifold_targets(): integrity-rejected samples excluded from contradiction quota
+  - Budget state includes guardrail_action and original_weights
+- Modified scripts/manifold_kpi.py:
+  - router_drift_rate is now THE REAL KPI (shown first in dashboard)
+  - compute_router_drift(): reads drift log, computes rolling rate + pattern breakdown
+  - Drift CRITICAL/WARNING appears in verdict system
+- Modified scripts/refresh_acquisition.py:
+  - Step 0: drift guardrail check before any retraining
+  - Skips retrain if CRITICAL (would worsen manifold drift)
+  - Skips weight adaptation if WARNING (freeze weights)
+  - --freeze-ref flag for one-time π_ref setup
+- Froze π_ref from v2.5.1 router at 2026-04-20T03:23:22
+- Verified all demos pass with dual-routing active
+
+Stage Summary:
+- **New files**: scripts/reference_router.py
+- **Modified files**: scripts/manifold_predict.py, scripts/acquisition_policy.py, scripts/manifold_kpi.py, scripts/refresh_acquisition.py
+- **New artifacts**: model/reference_router.pkl, logs/router_drift_log.jsonl, logs/drift_guardrail_log.jsonl, logs/drift_state.json
+- **Key concept**: The decomposition is now a FIXED coordinate system, not a moving target
+- **Drift guardrails**: WARNING(>0.15)=freeze weights, CRITICAL(>0.25)=fallback 33/33/33
+- **Contradiction integrity**: π_ref must agree before contradiction channel accepts sample
+- **New primary KPI**: router_drift_rate (manifold stability > everything else)
+- **System completeness**:
+  - Manifold decomposition: ✅
+  - Manifold control: ✅
+  - Data allocation: ✅
+  - Manifold stability: ✅ (now fixed)
+- **Committed**: 45fa083, tag v2.6.0-reference-router
+- **No changes to**: scoring, thresholds, manifold heads, contradiction/boundary classifiers, control actions
